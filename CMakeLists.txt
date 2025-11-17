@@ -20,5 +20,5 @@ target_link_libraries(brownian PRIVATE SFML::Graphics)
 
 # TESTS
 add_subdirectory(lib/Catch2)
-add_executable(brownian-test test/test.cpp)
+add_executable(brownian-test test/Particle2D_test.cpp)
 target_link_libraries(brownian-test PRIVATE Catch2::Catch2WithMain)
