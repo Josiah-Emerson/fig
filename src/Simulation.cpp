@@ -20,5 +20,5 @@ void Simulation::run() {
 
 
 void Simulation::step(){
-   particle_.updatePosition( {particle_.position().x * 2, particle_.position().y + 1 }) ;
+   particle_.updatePosition( {particle_.position().x + 2, particle_.position().y + 1 }) ;
 }
