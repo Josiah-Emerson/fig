@@ -1,38 +1,24 @@
 #include "Simulation.h"
+#include <chrono>
+#include <iostream>
 
-void Simulation::run(){
-   while(window_.isOpen()){
-      while(const std::optional event = window_.pollEvent()){
-         if(event->is<sf::Event::Closed>())
-            window_.close();
-      }
+void Simulation::run() {
+   std::size_t i { 0 };
 
-      window_.clear();
-      updateParticle();
-      drawParticle();
-
-      window_.display();
+   auto start = std::chrono::high_resolution_clock::now();
+   while(i < numTimesteps_){
+      step();
+      trajectory_.emplace_back( particle_.position(), (simulationLengthSeconds_ / numTimesteps_) * i );
+      ++i;
    }
+   auto end = std::chrono::high_resolution_clock::now();
+
+   std::chrono::duration<double, std::milli> duration = end - start;
+   std::cout << "Total time taken to simulate: " << duration.count() << "ms\n";
+   std::cout << "An average of " << duration.count()/numTimesteps_ << "ms per step\n";
 }
 
-void Simulation::updateParticle(){
-   particle_.updatePosition( {particle_.position().x + particle_.radius(), particle_.position().y + (particle_.radius())} );
-}
 
-void Simulation::drawParticle(){
-   sf::CircleShape circle { metersToPixels(particle_.radius()) };
-   //circle.setFillColor({ 255, 255, 255 } );
-   circle.setFillColor(sf::Color(255, 255, 255));
-   circle.setOrigin({ circle.getRadius(), circle.getRadius()} );
-   circle.setPosition({
-         window_.getSize().x/2.f + metersToPixels(particle_.position().x),
-         window_.getSize().y/2.f + metersToPixels(particle_.position().y)
-         });
-
-   window_.draw(circle);
-}
-
-float Simulation::metersToPixels(double val) const {
-   const double PIXELS_PER_METER { window_.getSize().x / sett_.viewWidthMeters };
-   return PIXELS_PER_METER * val;
+void Simulation::step(){
+   particle_.updatePosition( {particle_.position().x * 2, particle_.position().y + 1 }) ;
 }

@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Simulation.h"
+#include <iostream>
 
 
 int main(){
@@ -8,37 +9,15 @@ int main(){
    // width of the screen to be in terms of particles
    constexpr int WINDOW_WIDTH_PARTICLES{ 1000 };
 
+   constexpr int NUM_TIME_STEPS { 24 };
+   constexpr double SIMULATION_LENGTH_SECONDS { 4e-9 };
+
    Particle2D particle {PARTICLE_RADIUS_METERS};
-   Simulation sim {{particle.radius() * WINDOW_WIDTH_PARTICLES, 0}, particle };
+   Simulation sim { NUM_TIME_STEPS, SIMULATION_LENGTH_SECONDS, particle};
    sim.run();
+   auto traj = sim.getTrajectory();
 
-   /*
-   auto window = sf::RenderWindow(sf::VideoMode::getFullscreenModes().at(0), "brownian");
-   window.setFramerateLimit(144);
-
-   sf::CircleShape circle(3.f);
-   circle.setFillColor(sf::Color(255, 255, 255));
-   circle.setOrigin({circle.getRadius(), circle.getRadius()});
-   sf::Vector2u windowSize {window.getSize()};
-   circle.setPosition({ 0, windowSize.y/2.f});
-
-   while(window.isOpen()){
-      while(const std::optional event = window.pollEvent()){
-         if(event->is<sf::Event::Closed>())
-            window.close();
-      }
-
-      window.clear();
-
-      sf::Vector2<float> currPos { circle.getPosition()};
-      circle.setPosition( { currPos.x + 1, currPos.y } );
-      window.draw(circle);
-
-      window.display();
+   for(const auto& point : traj){
+      std::cout << "(" << point.first.x << ", " << point.first.y << ") at time " << point.second << '\n';
    }
-
-   window.clear();
-   window.display();
-   */
-
 }

@@ -17,3 +17,8 @@ add_executable(brownian src/main.cpp
                         src/Simulation.cpp)
 target_compile_features(brownian PRIVATE cxx_std_17)
 target_link_libraries(brownian PRIVATE SFML::Graphics)
+
+# TESTS
+add_subdirectory(lib/Catch2)
+add_executable(brownian-test test/test.cpp)
+target_link_libraries(brownian-test PRIVATE Catch2::Catch2WithMain)

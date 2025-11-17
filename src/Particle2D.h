@@ -15,11 +15,12 @@ class Particle2D{
       Particle2D(double radius, Position2D position = { 0, 0 } )
          : radius_ { radius }
          , position_ { position }
-         { }
+         {}
 
       double radius() const { return radius_; }
       Position2D position() const { return position_; }
 
       void updatePosition(const Position2D& newPosition) { position_ = newPosition; }
 };
+
 
