@@ -1,5 +1,64 @@
 // implementation of Euler-Maruyama method for approximate numerical solution of SDE
+#pragma once
+#include <array>
+#include <functional>
+#include <utility>
+#include <vector>
+#include <stdexcept>
+#include <random>
 
+template<std::size_t NDim>
+class EulerMaruyama{
+   public:
+      using vectorND = std::array<double, NDim>;
+      using stepperFunc = std::function<vectorND(vectorND, double time)>;
+
+   private: 
+      std::vector<std::pair<vectorND, double>> results_; // the second argument in pair (double) represents the timestamp. the vector will be of size N + 1, where N represents the number of timesteps to compute
+      stepperFunc a_;
+      stepperFunc b_;
+      std::vector<vectorND> W_; // populated during construction to have a size of the number of timesteps + 1
+
+   public: 
+      // T is length in seconds of sim to run 
+      // N is number of steps to divide time T into
+      // X0 is an array of doubles with N elements representing the inital values for the system
+      // a and b are functions which satisfy the SDE dX_t = a(X_t, t)dt + b(X_t, t)dW_t
+      EulerMaruyama(const double T, const int N, const vectorND& X0, const stepperFunc& a, stepperFunc& b)
+         : a_ { a }
+         , b_ { b }
+         {
+            if(T <= 0)
+               throw std::invalid_argument("T (length of time to simulate) must be positive and non-zero");
+            if(N <= 0)
+               throw std::invalid_argument("N (number of time steps) must be positive and non-zero");
+
+            results_.reserve(N + 1);
+            results_[0].first = X0;
+
+            const double DELTA_TIME { T/static_cast<double>(N) };
+            for(std::size_t i { 0 }; i < N + 1; ++i)
+               results_[i].seconds = i * DELTA_TIME;
+
+            W_.reserve(N + 1);
+            std::random_device rd  { };
+            std::mt19937 gen { rd() };
+            std::normal_distribution<double> W {0.0, std::sqrt(DELTA_TIME)}; // normal distribution with mean 0 and variance dt
+                                                                             
+            for(std::size_t i { 0 }; i < N + 1; ++i){
+               for(std::size_t k { 0 }; k < NDim; ++k){
+                  W_[i][k] = W(gen);
+               }
+            }
+         }
+      std::vector<std::pair<vectorND, double>> run();
+
+   private: 
+      vectorND step(const vectorND&, const double DELTA_W);
+      vectorND dW(const std::size_t n);
+};
+
+/*
 #pragma once
 #include <functional>
 #include <stdexcept>
@@ -47,3 +106,4 @@ class EulerMaruyama {
          void step();
          double dW();
 };
+*/
