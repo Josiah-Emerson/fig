@@ -1,6 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include "Simulation.h"
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <functional>
 #include <matplot/matplot.h>
+#include "EulerMaruyama.h"
 
 
 void plotTrajectory(const std::vector<std::pair<Particle2D::Position2D, double>>& traj){
@@ -23,6 +28,7 @@ void plotTrajectory(const std::vector<std::pair<Particle2D::Position2D, double>>
 
 }
 int main(){
+   /* 
    // radius of particle in meters
    constexpr double PARTICLE_RADIUS_METERS { 2.5e-6 };
    // width of the screen to be in terms of particles
@@ -34,5 +40,22 @@ int main(){
    Simulation sim { NUM_TIME_STEPS, SIMULATION_LENGTH_SECONDS, particle};
    sim.run();
    plotTrajectory(sim.getTrajectory());
+   */
+
+   constexpr double D { 2.6e-3 };
+   std::function<double(double, double)> a = [](double x, double y) -> double {return 0; };
+   std::function<double(double, double)> b = [](double x, double y) -> double { return std::sqrt(2 * D); };
+   //EulerMaruyama em {1, 1000, 0, a, b};
+   //em.run();
+
+   std::array<double, 1000> arr {};
+   for(std::size_t i { 0 }; i < 1000; ++i){
+      EulerMaruyama em {1e-5, 100, 0, a, b};
+      em.run();
+      arr[i] = em.getPosition();
+   }
+
+   auto h = matplot::hist(arr, matplot::histogram::binning_algorithm::scott);
+   matplot::show();
 }
 
