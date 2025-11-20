@@ -7,6 +7,7 @@
 #include <matplot/matplot.h>
 #include <utility>
 #include "EulerMaruyama.h"
+#include "matplot/core/line_spec.h"
 #include "matplot/freestanding/plot.h"
 
 
@@ -54,12 +55,10 @@ int main(){
       return EulerMaruyama<2>::vectorND { 0 };
    };
    EulerMaruyama<2>::stepperFunc b = [](const EulerMaruyama<2>::vectorND X, double time) -> EulerMaruyama<2>::vectorND {
-      return EulerMaruyama<2>::vectorND { std::sqrt(2 * D) };
+      EulerMaruyama<2>::vectorND res { };
+      res.fill(std::sqrt(2 * D));
+      return res;
    };
-
-   EulerMaruyama<2> em (1e-5, 1000, {0}, a, b);
-   em.run();
-   return 0;
 
    std::array<EulerMaruyama<2>::vectorND, 1000> arr {};
    for(std::size_t i { 0 }; i < 1000; ++i){
@@ -67,7 +66,6 @@ int main(){
       EulerMaruyama<2> em (1e-5, 1000, {0}, a, b);
       auto results = em.run();
       arr[i] = results.back().first;
-      std::cout << "After " << i << '\n';
    }
 
    std::vector<double> x { };
@@ -77,7 +75,9 @@ int main(){
       y.emplace_back(arr[i][1]);
    }
 
-   matplot::scatter(x, y);
+   auto p = matplot::scatter(x, y);
+   p->marker_size(5);
+   p->marker_face(true);
    matplot::show();
 }
 

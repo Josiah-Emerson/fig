@@ -1,7 +1,5 @@
 // implementation of Euler-Maruyama method for approximate numerical solution of SDE
 #pragma once
-#include <algorithm>
-#include <iostream>
 #include <array>
 #include <functional>
 #include <utility>
@@ -82,16 +80,10 @@ typename EulerMaruyama<NDim>::vectorND EulerMaruyama<NDim>::step(
    const vectorND B { b_(X, t)};
 
    vectorND res { };
-   std::cout << "==========================\n";
    for(std::size_t i { 0 }; i < NDim; ++i){
-      std::cout  << "A:" << A[i] << '\n';
-      std::cout  << "B:" << B[i] << '\n';
-      std::cout << "W: " << DELTA_W[i] << '\n';
       res[i] = X[i] + A[i] + (B[i] * DELTA_W[i]);
    }
 
-   std::cout << "x: " << res[0] << '\n';
-   std::cout << "y: " << res[1] << '\n';
    return res;
 
 }
