@@ -1,5 +1,7 @@
 // implementation of Euler-Maruyama method for approximate numerical solution of SDE
 #pragma once
+#include <algorithm>
+#include <iostream>
 #include <array>
 #include <functional>
 #include <utility>
@@ -35,11 +37,11 @@ class EulerMaruyama{
                throw std::invalid_argument("N (number of time steps) must be positive and non-zero");
 
             results_.reserve(static_cast<std::size_t>(N + 1));
-            results_[0].first = X0;
+            results_.emplace_back(vectorND {X0}, 0);
 
             const double DELTA_TIME { T/static_cast<double>(N) };
-            for(std::size_t i { 0 }; i < N + 1; ++i)
-               results_[i].second = i * DELTA_TIME;
+            for(std::size_t i { 1 }; i < N + 1; ++i)
+               results_.emplace_back(vectorND { 0 }, (i * DELTA_TIME));
 
             W_.reserve(static_cast<std::size_t>(N + 1));
             std::random_device rd  { };
@@ -80,10 +82,16 @@ typename EulerMaruyama<NDim>::vectorND EulerMaruyama<NDim>::step(
    const vectorND B { b_(X, t)};
 
    vectorND res { };
+   std::cout << "==========================\n";
    for(std::size_t i { 0 }; i < NDim; ++i){
+      std::cout  << "A:" << A[i] << '\n';
+      std::cout  << "B:" << B[i] << '\n';
+      std::cout << "W: " << DELTA_W[i] << '\n';
       res[i] = X[i] + A[i] + (B[i] * DELTA_W[i]);
    }
 
+   std::cout << "x: " << res[0] << '\n';
+   std::cout << "y: " << res[1] << '\n';
    return res;
 
 }

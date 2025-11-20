@@ -5,7 +5,9 @@
 #include <cstddef>
 #include <functional>
 #include <matplot/matplot.h>
+#include <utility>
 #include "EulerMaruyama.h"
+#include "matplot/freestanding/plot.h"
 
 
 void plotTrajectory(const std::vector<std::pair<Particle2D::Position2D, double>>& traj){
@@ -48,21 +50,34 @@ int main(){
    //EulerMaruyama em {1, 1000, 0, a, b};
    //em.run();
 
-   EulerMaruyama<1>::stepperFunc a = [](const EulerMaruyama<1>::vectorND X, double time) -> EulerMaruyama<1>::vectorND {
-      return EulerMaruyama<1>::vectorND { 0 };
+   EulerMaruyama<2>::stepperFunc a = [](const EulerMaruyama<2>::vectorND X, double time) -> EulerMaruyama<2>::vectorND {
+      return EulerMaruyama<2>::vectorND { 0 };
    };
-   EulerMaruyama<1>::stepperFunc b = [](const EulerMaruyama<1>::vectorND X, double time) -> EulerMaruyama<1>::vectorND {
-      return EulerMaruyama<1>::vectorND { std::sqrt(2 * D) };
+   EulerMaruyama<2>::stepperFunc b = [](const EulerMaruyama<2>::vectorND X, double time) -> EulerMaruyama<2>::vectorND {
+      return EulerMaruyama<2>::vectorND { std::sqrt(2 * D) };
    };
-   std::array<double, 1000> arr {};
+
+   EulerMaruyama<2> em (1e-5, 1000, {0}, a, b);
+   em.run();
+   return 0;
+
+   std::array<EulerMaruyama<2>::vectorND, 1000> arr {};
    for(std::size_t i { 0 }; i < 1000; ++i){
       //EulerMaruyama<1>::vectorND X { 0 };
-      EulerMaruyama<1> em (1e-5, 100, {0}, a, b);
+      EulerMaruyama<2> em (1e-5, 1000, {0}, a, b);
       auto results = em.run();
-      arr[i] = results.back().first[0];
+      arr[i] = results.back().first;
+      std::cout << "After " << i << '\n';
    }
 
-   auto h = matplot::hist(arr, matplot::histogram::binning_algorithm::scott);
+   std::vector<double> x { };
+   std::vector<double> y { };
+   for(std::size_t i { 0 }; i < 1000; ++i){
+      x.emplace_back(arr[i][0]);
+      y.emplace_back(arr[i][1]);
+   }
+
+   matplot::scatter(x, y);
    matplot::show();
 }
 
