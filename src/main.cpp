@@ -43,16 +43,23 @@ int main(){
    */
 
    constexpr double D { 2.6e-3 };
-   std::function<double(double, double)> a = [](double x, double y) -> double {return 0; };
-   std::function<double(double, double)> b = [](double x, double y) -> double { return std::sqrt(2 * D); };
+   //std::function<double(double, double)> a = [](double x, double y) -> double {return 0; };
+   //std::function<double(double, double)> b = [](double x, double y) -> double { return std::sqrt(2 * D); };
    //EulerMaruyama em {1, 1000, 0, a, b};
    //em.run();
 
+   EulerMaruyama<1>::stepperFunc a = [](const EulerMaruyama<1>::vectorND X, double time) -> EulerMaruyama<1>::vectorND {
+      return EulerMaruyama<1>::vectorND { 0 };
+   };
+   EulerMaruyama<1>::stepperFunc b = [](const EulerMaruyama<1>::vectorND X, double time) -> EulerMaruyama<1>::vectorND {
+      return EulerMaruyama<1>::vectorND { std::sqrt(2 * D) };
+   };
    std::array<double, 1000> arr {};
    for(std::size_t i { 0 }; i < 1000; ++i){
-      EulerMaruyama em {1e-5, 100, 0, a, b};
-      em.run();
-      arr[i] = em.getPosition();
+      //EulerMaruyama<1>::vectorND X { 0 };
+      EulerMaruyama<1> em (1e-5, 100, {0}, a, b);
+      auto results = em.run();
+      arr[i] = results.back().first[0];
    }
 
    auto h = matplot::hist(arr, matplot::histogram::binning_algorithm::scott);
