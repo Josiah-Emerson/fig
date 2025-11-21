@@ -25,7 +25,7 @@ class EulerMaruyama{
       // N is number of steps to divide time T into
       // X0 is an array of doubles with N elements representing the inital values for the system
       // a and b are functions which satisfy the SDE dX_t = a(X_t, t)dt + b(X_t, t)dW_t
-      EulerMaruyama(const double T, const int N, const vectorND& X0, const stepperFunc& a, stepperFunc& b)
+      EulerMaruyama(const double T, const int N, const vectorND& X0, const stepperFunc a, stepperFunc b)
          : a_ { a }
          , b_ { b }
          {
@@ -52,6 +52,20 @@ class EulerMaruyama{
                }
             }
          }
+
+      EulerMaruyama(const double T, const int N, const vectorND& X0, const double a, const double b)
+         : EulerMaruyama(T, N, X0, 
+               [a](const vectorND& X, double time) -> vectorND{
+                  vectorND res { };
+                  res.fill(a);
+                  return res;
+               },
+               [b](const vectorND& X, double time) -> vectorND{
+                  vectorND res { };
+                  res.fill(b);
+                  return res;
+               })
+      { }
 
       std::vector<std::pair<vectorND, double>> run();
 
