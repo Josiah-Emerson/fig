@@ -1,7 +1,10 @@
 // implementation of Euler-Maruyama method for approximate numerical solution of SDE
 #pragma once
 #include <array>
+#include <cstdlib>
 #include <functional>
+#include <iostream>
+#include <numeric>
 #include <utility>
 #include <vector>
 #include <stdexcept>
@@ -19,6 +22,8 @@ class EulerMaruyama{
       stepperFunc a_;
       stepperFunc b_;
       std::vector<vectorND> W_; // populated during construction to have a size of the number of timesteps + 1
+      // TEMP 
+      double totalWalk_ { 0 };
 
    public: 
       // T is length in seconds of sim to run 
@@ -41,16 +46,17 @@ class EulerMaruyama{
             for(std::size_t i { 1 }; i < N + 1; ++i)
                results_.emplace_back(vectorND { 0 }, (i * DELTA_TIME));
 
-            W_.reserve(static_cast<std::size_t>(N + 1));
+            W_.resize(static_cast<std::size_t>(N + 1));
             std::random_device rd  { };
             std::mt19937 gen { rd() };
             std::normal_distribution<double> W {0.0, std::sqrt(DELTA_TIME)}; // normal distribution with mean 0 and variance dt
                                                                              
-            for(std::size_t i { 0 }; i < N + 1; ++i){
+            for(std::size_t i { 1 }; i < N + 1; ++i){
                for(std::size_t k { 0 }; k < NDim; ++k){
                   W_[i][k] = W(gen);
                }
             }
+
          }
 
       EulerMaruyama(const double T, const int N, const vectorND& X0, const double a, const double b)
@@ -68,6 +74,7 @@ class EulerMaruyama{
       { }
 
       std::vector<std::pair<vectorND, double>> run();
+      double getTotalWalk() const { return totalWalk_; } // TEMP
 
    private: 
       vectorND step(const vectorND& X, const vectorND& DELTA_W, const double t);
@@ -107,60 +114,10 @@ typename EulerMaruyama<NDim>::vectorND EulerMaruyama<NDim>::dW(const std::size_t
    vectorND res { };
 
    for(std::size_t i { 0 }; i < NDim; ++i){
-      res[i] = W_[n][i] - W_[n-1][i];
+      res[i] = W_[n][i];
    }
 
+   totalWalk_ += std::abs(res[0]); // TEMP
    return res;
 }
 
-
-
-/*
-#pragma once
-#include <functional>
-#include <stdexcept>
-#include <random>
-#include <cmath>
-
-class EulerMaruyama {
-   private: 
-      const double dt { };
-      int n { 0 };
-      const int N_ { };
-      double Y { };
-      using stepperFunc = std::function<double(double Y, double tau)>;
-      const stepperFunc a_;
-      const stepperFunc b_;
-      std::normal_distribution<> W;
-      double W_tn; 
-
-   public: 
-      EulerMaruyama(const double T, const int N, const double X0, const stepperFunc a, const stepperFunc b)
-         : dt { static_cast<double>(T)/static_cast<double>(N)}
-         , N_ { N }
-         , Y { X0 }
-         , a_ { a }
-         , b_ { b }
-         , W { std::normal_distribution(0.0, std::sqrt(dt))}
-         , W_tn { dW() }
-         {
-            if(T <= 0)
-               throw new std::invalid_argument("The length of time to solve for must be greater than 0");
-
-            if(N <= 0)
-               throw new std::invalid_argument("There must be a positive non-zero number of steps");
-
-            if(dt <= 0)
-               throw new std::invalid_argument("The values of T and N result in a negative or zero dt (T/N) value which is not allowed");
-
-
-         }
-
-         void run();
-         double getPosition() const { return Y; };
-
-   private: 
-         void step();
-         double dW();
-};
-*/
