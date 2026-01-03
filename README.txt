@@ -2,6 +2,8 @@ I believe the solver works correctly. See the MSD (Mean Squared Distance) check 
 ways to check the validity of the solver. Now just need to create some plots of the particle, and check dimensions past 1. Also,
 remove the added bits from the solver which were used for investigating things. Also, look into refactoring solver since we no longer subtract to find the distance and allat.
 
+ALSO: ADD BIT IN SOLVER WHICH MULTIPLIES FUNCTION A BY DELTA TIME, AS THIS IS PART OF EM SOLUTION
+
 
 The expected MSD is: 4.4e-05
 The average MSD after 10000 iterations for 1 time steps is: 4.36658e-05
