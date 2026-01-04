@@ -6,9 +6,13 @@
 #include <numeric>
 #include <ostream>
 #include <set>
+#include <string>
 #include <vector>
 #include "EulerMaruyama.h"
+#include "matplot/freestanding/axes_functions.h"
 #include "matplot/freestanding/plot.h"
+#include "matplot/util/colors.h"
+#include "matplot/util/handle_types.h"
 
 
 double norm(double N){
@@ -24,6 +28,7 @@ int main(){
 
    constexpr double D { 2.2e-5 };
 
+   /*
    const int NUM_TESTS { 10 };
    double results[NUM_TESTS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
    const int steps[NUM_TESTS] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000, 50000};
@@ -48,23 +53,30 @@ int main(){
    for(int i {0}; i < NUM_TESTS; ++i){
       std::cout <<"The average MSD after " <<NUM_ITER << " iterations for " << steps[i] << " time steps is: " << results[i]/NUM_ITER << '\n';
    }
-   /*
-   std::vector<double> x { };
-   std::vector<double> t { };
-   
-   for(std::size_t i { 0 }; i < 5; ++i){
-      EulerMaruyama<2> em (1, 100, {0}, 0, std::sqrt(2 * D));
-      auto results = em.run();
-      for(const auto& e : results){
-         x.emplace_back(e.first[0]);
-         t.emplace_back(e.second);
-      }
-      std::set<double> a;
+   */
 
-      auto p = matplot::plot(t, x);
+   const int timesteps[] = {10, 100, 1000, 10000, 100000};
+
+   matplot::colormap(matplot::palette::winter());
+   auto cmap = matplot::colormap();
+   matplot::hold(matplot::on);
+
+   for(std::size_t i { 0 }; i < std::size(timesteps); ++i){
+      EulerMaruyama<2> em = {1, timesteps[i], { 0 }, 0, std::sqrt(2 * D)};
+      auto res = em.run();
+
+      std::vector<double> x, t;
+      x.reserve(res.size());
+      t.reserve(res.size());
+
+      for(const auto& e : res){
+         x.push_back(e.first[0]);
+         t.push_back(e.second);
+      }
+
+      matplot::plot(t, x);
    }
 
    matplot::show();
-   */
 }
 
