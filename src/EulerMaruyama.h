@@ -1,15 +1,9 @@
 // implementation of Euler-Maruyama method for approximate numerical solution of SDE
 #pragma once
-#include <array>
-#include <cstdlib>
-#include <functional>
-#include <iostream>
-#include <numeric>
-#include <utility>
-#include <vector>
 #include <stdexcept>
 #include <random>
-#include <cstddef>
+#include <array>
+#include <functional>
 
 template<std::size_t NDim>
 class EulerMaruyama{

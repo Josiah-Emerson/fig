@@ -1,82 +1,98 @@
-//#include <SFML/Graphics.hpp>
-#include <array>
-#include <cmath>
-#include <cstddef>
-#include <matplot/matplot.h>
-#include <numeric>
-#include <ostream>
-#include <set>
-#include <string>
-#include <vector>
-#include "EulerMaruyama.h"
-#include "matplot/freestanding/axes_functions.h"
-#include "matplot/freestanding/plot.h"
-#include "matplot/util/colors.h"
-#include "matplot/util/handle_types.h"
+// #include "EulerMaruyama.h"
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <X11/X.h>
+#include <imgui.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_x11.h>
+#include <iostream>
 
-
-double norm(double N){
-   if(N >= 10)
-      return norm(N/10);
-   else if(N < 1.0)
-      return norm(N * 10);
-
-   return N;
-}
+static bool running = true;
 
 int main(){
-
-   constexpr double D { 2.2e-5 };
-
-   /*
-   const int NUM_TESTS { 10 };
-   double results[NUM_TESTS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-   const int steps[NUM_TESTS] = {1, 5, 10, 50, 100, 500, 1000, 5000, 10000, 50000};
-   constexpr int NUM_ITER { 10000 };
-   for(std::size_t i { 0 }; i < NUM_TESTS; ++i){
-      for(int j { 0 }; j < NUM_ITER; ++j){
-         EulerMaruyama<2> em (1, steps[i], { 0 }, 0, std::sqrt(2 * D));
-         const double finalX = em.run().back().first[0];
-         double MSD = finalX * finalX;
-         results[i] += MSD;
-
-         if(j % (NUM_ITER/10) == 0)
-            std::cout << "Iteration #" << j << " on step #" << i << '\n';
-      }
+   Display* display = XOpenDisplay(NULL);
+   int glxfbAttributeList[] = {GLX_DOUBLEBUFFER, True,
+                              GLX_RED_SIZE, 8,
+                              GLX_GREEN_SIZE, 8,
+                              GLX_BLUE_SIZE, 8,
+                              GLX_ALPHA_SIZE, 8,
+                              GLX_X_RENDERABLE, True,
+                              GLX_STENCIL_SIZE, 8,
+                              GLX_DEPTH_SIZE, 24,
+                              None};
+   int numElements {};
+   GLXFBConfig* glxfbConfig = glXChooseFBConfig(display, XDefaultScreen(display), glxfbAttributeList, &numElements);
+   if(!glxfbConfig){
+      std::cout << "No config\n";
+      return 1;
    }
 
-   for(int i { 0 }; i < 10; ++i)
-      std::cout <<'\n';
+   XVisualInfo* vInfo = glXGetVisualFromFBConfig(display, glxfbConfig[0]);
 
-   constexpr double MSD {2*D};
-   std::cout << "The expected MSD is: " << MSD <<'\n';
-   for(int i {0}; i < NUM_TESTS; ++i){
-      std::cout <<"The average MSD after " <<NUM_ITER << " iterations for " << steps[i] << " time steps is: " << results[i]/NUM_ITER << '\n';
+   XSetWindowAttributes setWindowAttributes { };
+   setWindowAttributes.event_mask = ButtonPressMask | ButtonReleaseMask | 
+                                    KeyPressMask | KeyReleaseMask | StructureNotifyMask;
+   setWindowAttributes.colormap = XCreateColormap(display, RootWindow(display, vInfo->screen), vInfo->visual, AllocNone);
+   Window win = XCreateWindow(display, RootWindow(display, vInfo->screen),
+                              0, 0, 1920, 1080, 0, vInfo->depth, InputOutput,
+                              vInfo->visual, CWEventMask | CWColormap, &setWindowAttributes);
+   XMapWindow(display, win);
+
+   GLXWindow glxWin = glXCreateWindow(display, glxfbConfig[0], win, NULL);
+
+   GLXContext glxContext = glXCreateNewContext(display, glxfbConfig[0], GLX_RGBA_TYPE, NULL, True);
+   if(!glXMakeContextCurrent(display, glxWin, glxWin, glxContext)){
+      std::cout << "Error making context current\n";
+      return 1;
    }
+
+   // setup for ImGui
+   IMGUI_CHECKVERSION();
+   ImGui::CreateContext();
+   ImGuiIO& io = ImGui::GetIO();
+   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+
+   // style
+   ImGui::StyleColorsDark();
+
+   // TODO: Implement a way to adjust the scaling based on the dpi of the system 
+   // https://stackoverflow.com/questions/49071914/how-to-get-system-scale-factor-in-x11
+   // Talks about how to possibly do that in X11 ^ 
+   /* 
+   ImGuiStyle& style = ImGui::GetStyle();
+   style.ScaleAllSizes(main_scale);
+   style.FontScaleDpi = main_scale;
    */
 
-   const int timesteps[] = {10, 100, 1000, 10000, 100000};
 
-   matplot::colormap(matplot::palette::winter());
-   auto cmap = matplot::colormap();
-   matplot::hold(matplot::on);
+   // Setup Platform/Renderer backends
+   ImGui_ImplX11_InitForOpenGL(display, &win, &glxContext);
+   ImGui_ImplOpenGL3_Init();
 
-   for(std::size_t i { 0 }; i < std::size(timesteps); ++i){
-      EulerMaruyama<2> em = {1, timesteps[i], { 0 }, 0, std::sqrt(2 * D)};
-      auto res = em.run();
-
-      std::vector<double> x, t;
-      x.reserve(res.size());
-      t.reserve(res.size());
-
-      for(const auto& e : res){
-         x.push_back(e.first[0]);
-         t.push_back(e.second);
+   while(running){
+      while(XPending(display) > 0){
+         XEvent event { };
+         XNextEvent(display, &event);
+         ImGui_ImplX11_ProcessEvent(&event);
+         if(event.type != StructureNotifyMask){
+            std::cout << "button or key event detected\n";
+         }
       }
 
-      matplot::plot(t, x);
-   }
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplX11_NewFrame();
+      ImGui::NewFrame();
 
-   matplot::show();
+      bool showDemoWindow = true;
+      ImGui::ShowDemoWindow(&showDemoWindow);
+
+      ImGui::Render();
+
+      glClearColor(1, 0, 0, 1);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      glXSwapBuffers(display, glxWin);
+   }
+   return 0;
 }
 
