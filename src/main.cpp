@@ -66,7 +66,7 @@ int main(){
 
 
    // Setup Platform/Renderer backends
-   ImGui_ImplX11_InitForOpenGL(display, &win, &glxContext);
+   ImGui_ImplX11_InitForOpenGL(display, &win);
    ImGui_ImplOpenGL3_Init();
 
    while(running){
