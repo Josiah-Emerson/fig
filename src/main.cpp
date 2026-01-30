@@ -31,7 +31,8 @@ int main(){
 
    XSetWindowAttributes setWindowAttributes { };
    setWindowAttributes.event_mask = ButtonPressMask | ButtonReleaseMask | 
-                                    KeyPressMask | KeyReleaseMask | StructureNotifyMask;
+                                    KeyPressMask | KeyReleaseMask | 
+                                    StructureNotifyMask | PointerMotionMask;
    setWindowAttributes.colormap = XCreateColormap(display, RootWindow(display, vInfo->screen), vInfo->visual, AllocNone);
    Window win = XCreateWindow(display, RootWindow(display, vInfo->screen),
                               0, 0, 1920, 1080, 0, vInfo->depth, InputOutput,
@@ -75,7 +76,7 @@ int main(){
          XNextEvent(display, &event);
          ImGui_ImplX11_ProcessEvent(&event);
          if(event.type != StructureNotifyMask){
-            std::cout << "button or key event detected\n";
+            std::cout << "None button or key event detected";
          }
       }
 
