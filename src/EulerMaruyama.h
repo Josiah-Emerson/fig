@@ -18,6 +18,7 @@ class EulerMaruyama{
       std::vector<vectorND> W_; // populated during construction to have a size of the number of timesteps + 1
       // TEMP 
       double totalWalk_ { 0 };
+      const double dt_;
 
    public: 
       // T is length in seconds of sim to run 
@@ -27,6 +28,7 @@ class EulerMaruyama{
       EulerMaruyama(const double T, const int N, const vectorND& X0, const stepperFunc a, stepperFunc b)
          : a_ { a }
          , b_ { b }
+         , dt_ { T/static_cast<double>(N) }
          {
             if(T <= 0)
                throw std::invalid_argument("T (length of time to simulate) must be positive and non-zero");
@@ -36,14 +38,13 @@ class EulerMaruyama{
             results_.reserve(static_cast<std::size_t>(N + 1));
             results_.emplace_back(vectorND {X0}, 0);
 
-            const double DELTA_TIME { T/static_cast<double>(N) };
             for(std::size_t i { 1 }; i < N + 1; ++i)
-               results_.emplace_back(vectorND { 0 }, (i * DELTA_TIME));
+               results_.emplace_back(vectorND { 0 }, (i * dt_));
 
             W_.resize(static_cast<std::size_t>(N + 1));
             std::random_device rd  { };
             std::mt19937 gen { rd() };
-            std::normal_distribution<double> W {0.0, std::sqrt(DELTA_TIME)}; // normal distribution with mean 0 and variance dt
+            std::normal_distribution<double> W {0.0, std::sqrt(dt_)}; // normal distribution with mean 0 and variance dt
                                                                              
             for(std::size_t i { 1 }; i < N + 1; ++i){
                for(std::size_t k { 0 }; k < NDim; ++k){
@@ -96,7 +97,7 @@ typename EulerMaruyama<NDim>::vectorND EulerMaruyama<NDim>::step(
 
    vectorND res { };
    for(std::size_t i { 0 }; i < NDim; ++i){
-      res[i] = X[i] + A[i] + (B[i] * DELTA_W[i]);
+      res[i] = X[i] + (A[i] * dt_) + (B[i] * DELTA_W[i]);
    }
 
    return res;

@@ -6,7 +6,10 @@
 #include <cfloat>
 #include <chrono>
 #include <cstring> // for strcpy
-#include <iostream>
+                   
+// TODO: When pressing CTRL, it stays set until another key is pressed. This means if you press control and then try and scroll without hitting another key, no scroll happens
+// TODO: CLosing menu with x button doesn't work. Not sure if us issue or ImGui issue
+// TODO: When imgui demo starts up, left Alt modifier is always found to be on until it is pressed again. Not sure if X problem or laptop problem
 
 // time in milliseconds and a type of double
 typedef std::chrono::duration<double, std::ratio<1, 1000>> SystemTime;
@@ -249,6 +252,393 @@ static ImGuiKey ImGui_ImplX11_TranslateKeyPressed(XKeyEvent* keyEvent){
    return ImGuiKey_None;
 }
 
+// TODO: Idk if this is best way? It works doe
+static bool ImGui_ImplX11_TranslateKeyToChar(XKeyEvent* keyEvent, char* out_char){
+   KeySym keySym = XLookupKeysym(keyEvent, 0);
+   bool shift = keyEvent->state & ShiftMask;
+   bool upperCase = shift || keyEvent->state & LockMask;
+
+   switch(keySym){
+      case(XK_Tab): 
+         *out_char = '\t';
+         break;
+      case(XK_space): 
+         *out_char = ' ';
+         break;
+      //case(XK_Escape): return '';
+      //case(XK_Control_L): return '';
+      //case(XK_Alt_L): return '';
+      //case(XK_Super_L): return '';
+      //case(XK_Control_R): return '';
+      //case(XK_Alt_R): return '';
+      //case(XK_Super_R): return '';
+      //case(XK_Menu): return '';
+      case(XK_0): 
+         if(!shift)
+            *out_char = '0';
+         else 
+            *out_char = ')';
+         break;
+      case(XK_1): 
+         if(!shift)
+            *out_char = '1';
+         else 
+            *out_char = '!';
+         break;
+      case(XK_2): 
+         if(!shift)
+            *out_char = '2';
+         else 
+            *out_char = '@';
+         break;
+      case(XK_3): 
+         if(!shift)
+            *out_char = '3';
+         else 
+            *out_char = '#';
+         break;
+      case(XK_4): 
+         if(!shift)
+            *out_char = '4';
+         else 
+            *out_char = '$';
+         break;
+      case(XK_5): 
+         if(!shift)
+            *out_char = '5';
+         else 
+            *out_char = '%';
+         break;
+      case(XK_6): 
+         if(!shift)
+            *out_char = '6';
+         else 
+            *out_char = '^';
+         break;
+      case(XK_7): 
+         if(!shift)
+            *out_char = '7';
+         else 
+            *out_char = '&';
+         break;
+      case(XK_8): 
+         if(!shift)
+            *out_char = '8';
+         else 
+            *out_char = '*';
+         break;
+      case(XK_9): 
+         if(!shift)
+            *out_char = '9';
+         else 
+            *out_char = '(';
+         break;
+      case(XK_a): 
+         if(upperCase)
+            *out_char = 'A';
+         else 
+            *out_char = 'a';
+         break;
+      case(XK_A): 
+         *out_char = 'A';
+         break;
+      case(XK_b): 
+         if(upperCase)
+            *out_char = 'B';
+         else 
+            *out_char = 'b';
+         break;
+      case(XK_B): 
+         *out_char = 'B';
+         break;
+      case(XK_c): 
+         if(upperCase)
+            *out_char = 'C';
+         else 
+            *out_char = 'c';
+         break;
+      case(XK_C): 
+         *out_char = 'C';
+         break;
+      case(XK_d): 
+         if(upperCase)
+            *out_char = 'D';
+         else 
+            *out_char = 'd';
+         break;
+      case(XK_D): 
+         *out_char = 'D';
+         break;
+      case(XK_e): 
+         if(upperCase)
+            *out_char = 'E';
+         else 
+            *out_char = 'e';
+         break;
+      case(XK_E): 
+         *out_char = 'E';
+         break;
+      case(XK_f): 
+         if(upperCase)
+            *out_char = 'F';
+         else 
+            *out_char = 'f';
+         break;
+      case(XK_F): 
+         *out_char = 'F';
+         break;
+      case(XK_g): 
+         if(upperCase)
+            *out_char = 'G';
+         else 
+            *out_char = 'g';
+         break;
+      case(XK_G): 
+         *out_char = 'G';
+         break;
+      case(XK_h): 
+         if(upperCase)
+            *out_char = 'H';
+         else 
+            *out_char = 'h';
+         break;
+      case(XK_H): 
+         *out_char = 'H';
+         break;
+      case(XK_i): 
+         if(upperCase)
+            *out_char = 'I';
+         else 
+            *out_char = 'i';
+         break;
+      case(XK_I): 
+         *out_char = 'I';
+         break;
+      case(XK_j): 
+         if(upperCase)
+            *out_char = 'J';
+         else 
+            *out_char = 'j';
+         break;
+      case(XK_J): 
+         *out_char = 'J';
+         break;
+      case(XK_k): 
+         if(upperCase)
+            *out_char = 'K';
+         else 
+            *out_char = 'k';
+         break;
+      case(XK_K): 
+         *out_char = 'K';
+         break;
+      case(XK_l): 
+         if(upperCase)
+            *out_char = 'L';
+         else 
+            *out_char = 'l';
+         break;
+      case(XK_L): 
+         *out_char = 'L';
+         break;
+      case(XK_m): 
+         if(upperCase)
+            *out_char = 'M';
+         else 
+            *out_char = 'm';
+         break;
+      case(XK_M): 
+         *out_char = 'M';
+         break;
+      case(XK_n): 
+         if(upperCase)
+            *out_char = 'N';
+         else 
+            *out_char = 'n';
+         break;
+      case(XK_N): 
+         *out_char = 'N';
+         break;
+      case(XK_o): 
+         if(upperCase)
+            *out_char = 'O';
+         else 
+            *out_char = 'o';
+         break;
+      case(XK_O): 
+         *out_char = 'O';
+         break;
+      case(XK_p): 
+         if(upperCase)
+            *out_char = 'P';
+         else 
+            *out_char = 'p';
+         break;
+      case(XK_P): 
+         *out_char = 'P';
+         break;
+      case(XK_q): 
+         if(upperCase)
+            *out_char = 'Q';
+         else 
+            *out_char = 'q';
+         break;
+      case(XK_Q): 
+         *out_char = 'Q';
+         break;
+      case(XK_r): 
+         if(upperCase)
+            *out_char = 'R';
+         else 
+            *out_char = 'r';
+         break;
+      case(XK_R): 
+         *out_char = 'R';
+         break;
+      case(XK_s): 
+         if(upperCase)
+            *out_char = 'S';
+         else 
+            *out_char = 's';
+         break;
+      case(XK_S): 
+         *out_char = 'S';
+         break;
+      case(XK_t): 
+         if(upperCase)
+            *out_char = 'T';
+         else 
+            *out_char = 't';
+         break;
+      case(XK_T): 
+         *out_char = 'T';
+         break;
+      case(XK_u): 
+         if(upperCase)
+            *out_char = 'U';
+         else 
+            *out_char = 'u';
+         break;
+      case(XK_U): 
+         *out_char = 'U';
+         break;
+      case(XK_v): 
+         if(upperCase)
+            *out_char = 'V';
+         else 
+            *out_char = 'v';
+         break;
+      case(XK_V): 
+         *out_char = 'V';
+         break;
+      case(XK_w): 
+         if(upperCase)
+            *out_char = 'W';
+         else 
+            *out_char = 'w';
+         break;
+      case(XK_W): 
+         *out_char = 'W';
+         break;
+      case(XK_x): 
+         if(upperCase)
+            *out_char = 'X';
+         else 
+            *out_char = 'x';
+         break;
+      case(XK_X): 
+         *out_char = 'X';
+         break;
+      case(XK_y): 
+         if(upperCase)
+            *out_char = 'Y';
+         else 
+            *out_char = 'y';
+         break;
+      case(XK_Y): 
+         *out_char = 'Y';
+         break;
+      case(XK_z): 
+         if(upperCase)
+            *out_char = 'Z';
+         else 
+            *out_char = 'z';
+         break;
+      case(XK_Z): 
+         *out_char = 'Z';
+         break;
+      case(XK_apostrophe): 
+         if(!shift)
+            *out_char = '\'';
+         else 
+            *out_char = '\"';
+         break;
+      case(XK_comma): 
+         if(!shift)
+            *out_char = ',';
+         else 
+            *out_char = '<';
+         break;
+      case(XK_minus): 
+         if(!shift)
+            *out_char = '-';
+         else 
+            *out_char = '_';
+         break;
+      case(XK_period): 
+         if(!shift)
+            *out_char = '.';
+         else 
+            *out_char = '>';
+         break;
+      case(XK_slash): 
+         if(!shift)
+            *out_char = '/';
+         else 
+            *out_char = '?';
+         break;
+      case(XK_semicolon): 
+         if(!shift)
+            *out_char = ';';
+         else 
+            *out_char = ':';
+         break;
+      case(XK_equal): 
+         if(!shift)
+            *out_char = '=';
+         else 
+            *out_char = '+';
+         break;
+      case(XK_bracketleft): 
+         if(!shift)
+            *out_char = '[';
+         else 
+            *out_char = '{';
+         break;
+      case(XK_backslash): 
+         if(!shift)
+            *out_char = '\\';
+         else 
+            *out_char = '|';
+         break;
+      case(XK_bracketright): 
+         if(!shift)
+            *out_char = ']';
+         else 
+            *out_char = '}';
+         break;
+      case(XK_grave): 
+         if(!shift)
+            *out_char = '`';
+         else 
+            *out_char = '~';
+         break;
+      default: out_char = nullptr;
+         return false;
+   }
+   return true;
+}
+
 bool ImGui_ImplX11_InitForOpenGL(Display* display, Window* window){
    return ImGui_ImplX11_Init(display, window);
 }
@@ -271,17 +661,33 @@ void ImGui_ImplX11_ProcessEvent(XEvent* event){
          break;
       case(MotionNotify): // TODO: All key and button events contain information about the pointer's location. Should we process this?
          bd->inWindow ? io.AddMousePosEvent(event->xmotion.x, event->xmotion.y) : io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
-         // TODO: Will likely need to add support for when pointer leaves window (there is an XEvent for this)
-         // TODO: Queue a mouse position update. Use -FLT_MAX,-FLT_MAX to signify no mouse (e.g. app not focused and not hovered)
          break;
       case(ButtonPress):
       case(ButtonRelease):
-         // TODO: Not sure how to add support for scroll from X but io.AddMouseWheelEvent does that?
-         //IM_ASSERT((event->xbutton.button == 1 || event->xbutton.button == 2) 
-                        //&& "Button released not equal to button 1 or 2");
+         // TODO: Figure out what button 2 is
+         if(event->xbutton.button <= 3){ // normal click events
+            io.AddMouseButtonEvent(static_cast<int>(event->xbutton.button - 1), event->type == ButtonPress);
+         }else{ //scroll
+            if(event->type == ButtonPress){ // X sends press and release events for a scroll. Need to disregard releases
+               switch(event->xbutton.button){
+                  case(4):
+                     io.AddMouseWheelEvent(0, 1.f);
+                     break;
+                  case(5):
+                     io.AddMouseWheelEvent(0, -1.f);
+                     break;
+                  case(6):
+                     io.AddMouseWheelEvent(1.f, 0);
+                     break;
+                  case(7):
+                     io.AddMouseWheelEvent(-1.f, 0);
+                     break;
+                  default:
+                     IM_ASSERT(false && "Should have never got here\n"); // TODO: Should be no more than 7 buttons
+               }
+            }
+         }
          // TODO: Should we call ImGui_ImplX11_SetKeyModifiers here?
-         std::cout << "Button passed: " << static_cast<int>(event->xbutton.button - 1) << '\n';
-         io.AddMouseButtonEvent(static_cast<int>(event->xbutton.button - 1), event->type == ButtonPress);
          break;
       case(KeyPress): 
       case(KeyRelease): 
@@ -292,6 +698,9 @@ void ImGui_ImplX11_ProcessEvent(XEvent* event){
          IM_ASSERT(key != ImGuiKey_None && "button pressed corresponds to an unhandled key"); // TODO: if it returns none is this an issue or does it not matter ?
                                                                                               // If its fine that that key isn't found do we still pass it back to io.AddKeyEvent()?
          io.AddKeyEvent(key, event->type == KeyPress);
+         char val;
+         if(event->type == KeyPress && ImGui_ImplX11_TranslateKeyToChar(&event->xkey, &val)) 
+            io.AddInputCharacter((unsigned int) val); // TODO: Do we have a better way (do we need to find one) of determining when something is a key event versus text input?
          break;
    }
 
@@ -310,8 +719,8 @@ void ImGui_ImplX11_ProcessEvent(XEvent* event){
       IME Support: setup Platform_SetImeDataFn() handler in ImGuiPlatformIO.
       Use io.AddFocusEvent() to notify when application window gets focused/unfocused.
       Multi-viewport Support
-      Update monitor list if supported.
-      Setup all required handlers in ImGuiPlatformIO to create/destroy/move/resize/title/focus/etc. windows.
+         Update monitor list if supported.
+         Setup all required handlers in ImGuiPlatformIO to create/destroy/move/resize/title/focus/etc. windows.
       */
 
 }
@@ -330,7 +739,8 @@ void ImGui_ImplX11_NewFrame(){
    SystemTime currentTime = ImGui_ImplX11_GetCurrentTime();
    float diff = currentTime.count() - bd->Time.count();
    IM_ASSERT((diff > 0) && "current time is older or the same as the previous time stored in backend");
-   io.DeltaTime = diff;
+   io.DeltaTime = diff / 1000.f; // convert from milliseconds to seconds
+   // TODO: Is there a better way than just dividing by 1000? If we change in the future must remember to change here?
    bd->Time = currentTime;
    // TODO - If we need to get the X server specific time (and not use the chrono lib) we can possibly use 
    // XChangeProperty() to force a property change event which will contain a timestamp from X Server. 

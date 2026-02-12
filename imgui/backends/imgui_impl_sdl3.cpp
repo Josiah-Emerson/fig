@@ -1,4 +1,5 @@
-/*
+#define DONT_COMPILE
+#ifndef DONT_COMPILE
 // dear imgui: Platform Backend for SDL3
 // This needs to be used along with a Renderer (e.g. SDL_GPU, DirectX11, OpenGL3, Vulkan..)
 // (Info: SDL3 is a cross-platform general purpose library for handling windows, inputs, graphics context creation, etc.)
@@ -871,5 +872,5 @@ void ImGui_ImplSDL3_NewFrame()
 
 #endif // #ifndef IMGUI_DISABLE
        //
-*/
+#endif
        
