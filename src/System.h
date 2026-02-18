@@ -36,3 +36,4 @@ class System{
    private: 
       void processEvent(const XEvent& event);
 };
+

@@ -67,7 +67,6 @@ System::~System(){
    // TODO: Do we need to do anything special for other stuff?
 }
 
-#include <iostream>
 void System::run(){
    // main loop: Poll events from X, send to imgui, if they don't want,
    // translate and send to application layer
