@@ -4,6 +4,10 @@
 #include <X11/Xlib.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_x11.h>
+#include <memory>
+#include "Fig.h"
+#include "Platform/LinuxPlatform.h"
+#include "Application.h"
 
 
 //TODO: Delete this and ifdefs/endif
@@ -13,8 +17,11 @@ static bool running = true;
 void processEvent(XEvent* event);
 
 int main(){
+   Application app { std::make_unique<LinuxPlatform>()};
+   /*
    System sys { };
    sys.run();
+   */
    return 0;
 
 #ifdef ABCD

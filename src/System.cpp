@@ -3,6 +3,8 @@
 #include <GL/gl.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_x11.h>
+#include <iostream>
+#include <climits> // for INT_MIN and INT_MAX
 #include <stdexcept> // for std::runtime_error
 
 System::System(){
@@ -82,11 +84,20 @@ void System::run(){
       ImGui_ImplX11_NewFrame();
       ImGui::NewFrame();
 
-      static bool b = true;
-      if(b)
-         ImGui::ShowDemoWindow(&b);
+      if(!ImGui::Begin("My Window")){
+         std::cout << "Begin is false\n";
+      }
+      static int i = 0;
+      if(ImGui::InputInt("i", &i)){
+         std::cout << "Could not draw slider\n";
+      }
+      if(ImGui::Button("Hello World!")){
+         std::cout << "Hello World #"  << i << "!\n";
+      }
+      ImGui::End();
       ImGui::Render();
 
+      //std::cout << "i: " << i << '\n';
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       glXSwapBuffers(XDisplay_, glxWindow_);
