@@ -18,6 +18,7 @@ void processEvent(XEvent* event);
 
 int main(){
    Application app { std::make_unique<LinuxPlatform>()};
+   app.run();
    /*
    System sys { };
    sys.run();

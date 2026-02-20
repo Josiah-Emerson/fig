@@ -11,8 +11,11 @@ class Platform{
    public: 
       virtual ~Platform() = default;
 
-      // TODO: better to return list of events we need to handle or just go one by one
-      // TODO: How to tell caller there are no events (either some type of nullptr or null type or a list of size 0)
-      virtual FigEvent PollEvents() = 0;
-      virtual void HelloWorld() const = 0;
+      // TODO: currently returns a vector of events. Would it be better to do c-style array?
+      // for this probably not? We only call this once per frame and it should only return a couple
+      // and we don't have to worry about memory management
+      virtual Fig::EventQueue PollEvents() = 0; // returns vector of Fig::Eventst to be handled by application
+      virtual void SwapBuffers() = 0;
+      virtual void NewImGuiFrame() = 0;
+      virtual void RenderImguiDrawData() = 0;
 };
