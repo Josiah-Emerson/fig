@@ -17,5 +17,7 @@ class Platform{
       virtual Fig::EventQueue PollEvents() = 0; // returns vector of Fig::Eventst to be handled by application
       virtual void SwapBuffers() = 0;
       virtual void NewImGuiFrame() = 0;
-      virtual void RenderImguiDrawData() = 0;
+      virtual void RenderImGuiDrawData() = 0;
+      virtual int GetWindowHeight() = 0;
+      virtual int GetWindowWidth() = 0;
 };

@@ -1,3 +1,8 @@
+TODO: Implement actual structures for Fig::Events (and maybe begin actually handling them in app), 
+
+
+
+Stuff for EulerMaruyama solver ( might be changed up later)
 I believe the solver works correctly. See the MSD (Mean Squared Distance) check below. Might be good idea to look into other
 ways to check the validity of the solver. Now just need to create some plots of the particle, and check dimensions past 1. Also,
 remove the added bits from the solver which were used for investigating things. Also, look into refactoring solver since we no longer subtract to find the distance and allat.

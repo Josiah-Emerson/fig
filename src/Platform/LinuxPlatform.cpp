@@ -1,6 +1,7 @@
 #include "LinuxPlatform.h"
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_x11.h>
 #include <imgui.h>
@@ -42,6 +43,11 @@ LinuxPlatform::LinuxPlatform()
    Window_.XWindow = XCreateWindow(Window_.XDisplay, RootWindow(Window_.XDisplay, vInfo->screen),
                            0, 0, 1920, 1080, 0, vInfo->depth, InputOutput,
                            vInfo->visual, CWEventMask | CWColormap, &setWindowAttributes);
+   // TODO: NOT A GOOD WAY TO SET THESE HERE OR IN CREATE WINDOW FUNC
+   Window_.x = 0;
+   Window_.y = 0;
+   Window_.width = 1920;
+   Window_.height = 1080;
    XMapWindow(Window_.XDisplay, Window_.XWindow);
 
    Window_.glxWindow = glXCreateWindow(Window_.XDisplay, glxfbConfig[0], Window_.XWindow, NULL);
@@ -84,8 +90,12 @@ Fig::EventQueue LinuxPlatform::PollEvents(){
       XNextEvent(Window_.XDisplay, &event);
       ImGui_ImplX11_ProcessEvent(&event);
 
-      if(ApplicationHandleEvent(&event))
-         queue.push_back(TranslateXEventToFigEvent(&event));
+      if(ApplicationHandleEvent(&event)){
+         Fig::EventQueue tempQueue  = TranslateXEventToFigEventQueue(&event); // TODO: is this performant enough? Does it matter?
+         for(Fig::Event e : tempQueue){
+            queue.push_back(e);
+         }
+      }
    }
 
    return queue;
@@ -101,7 +111,8 @@ void LinuxPlatform::NewImGuiFrame(){
    ImGui::NewFrame();
 }
 
-void LinuxPlatform::RenderImguiDrawData(){
+void LinuxPlatform::RenderImGuiDrawData(){
+   ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -138,29 +149,73 @@ bool LinuxPlatform::ApplicationHandleEvent(const XEvent* event){
    return true;
 }
 
-Fig::Event LinuxPlatform::TranslateXEventToFigEvent(const XEvent* event){
+Fig::Key LinuxPlatform::TranslateXKeyToFigKey(XKeyEvent* keyEvent){
+   KeySym keySym = XLookupKeysym(keyEvent, 0);
+
+   using namespace Fig;
+   switch(keySym){
+      case(XK_Escape): return Key::ESCAPE;
+      default: return Key::OTHER;
+   }
+}
+
+Fig::EventQueue LinuxPlatform::TranslateXEventToFigEventQueue(XEvent* event){
    Fig::Event Fevent { };
+   Fig::EventQueue queue { };
+
    switch(event->type){
       case(KeyPress):
-         Fevent.Type = Fig::EventType::KEY_PRESS;
-         break;
       case(KeyRelease):
-         Fevent.Type = Fig::EventType::KEY_RELEASE;
+         Fevent.Type = event->type == KeyPress ? Fig::EventType::KEY_PRESS : Fig::EventType::KEY_RELEASE;
+         Fevent.FKey.key = TranslateXKeyToFigKey(&event->xkey);
+         queue.push_back(Fevent);
          break;
       case(ButtonPress):
          Fevent.Type = Fig::EventType::BUTTON_PRESS;
+         queue.push_back(Fevent);
          break;
       case(ButtonRelease):
          Fevent.Type = Fig::EventType::BUTTON_RELEASE;
+         queue.push_back(Fevent);
          break;
       case(ConfigureNotify):
-         // TODO: see X docs, but this does not mean there is necessarily a resize. 
-         Fevent.Type = Fig::EventType::WINDOW_RESIZE;
+         if(event->xconfigure.x != Window_.x || event->xconfigure.y != Window_.y){
+            Fevent.Type = Fig::EventType::WINDOW_MOVE;
+            updateWindowPosition(event->xconfigure.x, event->xconfigure.y);
+            queue.push_back(Fevent);
+         }
+
+         if(event->xconfigure.width != Window_.width || event->xconfigure.height != Window_.height){
+            Fevent.Type = Fig::EventType::WINDOW_RESIZE;
+            updateWindowSize(event->xconfigure.width, event->xconfigure.height);
+            queue.push_back(Fevent);
+         }
+
+         if(queue.size() == 0){ // TODO: Temp for there is a chance we get a ConfigureNotify event which is not a window move or resize
+            Fevent.Type = Fig::EventType::WINDOW_OTHER;
+            queue.push_back(Fevent);
+         }
+         break;
+      case(MotionNotify):
+         Fevent.Type = Fig::EventType::MOUSE_MOVEMENT;
+         queue.push_back(Fevent);
          break;
       default: 
          Fevent.Type = Fig::EventType::NULL_EVENT;
+         queue.push_back(Fevent);
          break;
    }
 
-   return Fevent;
+   return queue;
+}
+
+// TODO: pretty sure that x and y are relative to X root window and not the screen. If this ends up mattering need to change somehow
+void LinuxPlatform::updateWindowPosition(int x, int y){
+   Window_.x = x;
+   Window_.y = y;
+}
+
+void LinuxPlatform::updateWindowSize(int width, int height){
+   Window_.width = width;
+   Window_.height = height;
 }
