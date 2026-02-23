@@ -24,6 +24,8 @@ class LinuxPlatform : public Platform {
       void SwapBuffers() override;
       void NewImGuiFrame() override;
       void RenderImGuiDrawData() override;
+      int GetWindowHeight() override { return Window_.height; }
+      int GetWindowWidth() override { return Window_.width; }
 
    private: 
       // This indicates that ImGui (or other) does not want the input and thus the application should handle it (or decide not to handle)
@@ -32,6 +34,4 @@ class LinuxPlatform : public Platform {
       Fig::Key TranslateXKeyToFigKey(XKeyEvent* keyEvent);
       void updateWindowPosition(int x, int y);
       void updateWindowSize(int width, int height);
-      int GetWindowHeight() override { return Window_.height; }
-      int GetWindowWidth() override { return Window_.width; }
 };

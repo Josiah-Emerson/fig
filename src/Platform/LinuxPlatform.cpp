@@ -11,6 +11,7 @@
 LinuxPlatform::LinuxPlatform()
    : Platform { }
 {
+
    Window_.XDisplay = XOpenDisplay(NULL);
 
    // TODO: More flexible way to choose options
@@ -112,7 +113,6 @@ void LinuxPlatform::NewImGuiFrame(){
 }
 
 void LinuxPlatform::RenderImGuiDrawData(){
-   ImGui::Render();
    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -210,6 +210,7 @@ Fig::EventQueue LinuxPlatform::TranslateXEventToFigEventQueue(XEvent* event){
 }
 
 // TODO: pretty sure that x and y are relative to X root window and not the screen. If this ends up mattering need to change somehow
+// TODO: not coupled with an actual X window update so this could become out of sync if called on its own
 void LinuxPlatform::updateWindowPosition(int x, int y){
    Window_.x = x;
    Window_.y = y;
