@@ -1,5 +1,5 @@
 #pragma once 
-#include "../Platform/Platform.h" // TODO: modulize better so that this doesnt need to happen
+#include "Fig_Platform/Platform.h"
 // TODO: Nowhere near final 
 
 class Renderer{

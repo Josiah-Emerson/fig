@@ -1,7 +1,7 @@
 #pragma once 
-#include "Platform/Platform.h"
-#include "Engine/Engine.h"
-#include "Render/Renderer.h"
+#include "Fig_Platform/Platform.h"
+#include "Fig_Engine/Engine.h"
+#include "Fig_Render/Renderer.h"
 #include "Ui.h"
 #include <memory> // std::unique_ptr<>
 

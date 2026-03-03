@@ -1,5 +1,5 @@
 #pragma once
-#include "Platform.h"
+#include "Fig_Platform/Platform.h"
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 

@@ -1,6 +1,6 @@
 #pragma once
-
 #include <vector>
+
 namespace  Fig{
    enum class EventType{
       NULL_EVENT, // Should only happen if a translate to fig event cannot figure out what to translate to
@@ -52,4 +52,8 @@ namespace  Fig{
 
    using EventQueue = std::vector<Event>;
 
+   struct Vec2i{
+      int x;
+      int y;
+   };
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include "Platform/Platform.h"
+#include "Fig_Platform/Platform.h"
 // TODO: Very temporary, not sure how I want to go about doing this yet 
 // Some very different approaches exist (see ehre vs tracy for imgui
 

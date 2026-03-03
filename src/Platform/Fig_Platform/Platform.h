@@ -1,5 +1,5 @@
 #pragma once 
-#include "../Fig.h"
+#include "Fig_Fig/Fig.h"
 
 // Platform is intended to be an abstraction for OS specific stuff
 // Inheriting classes should setup things such as the window, ImGui, OpenGL, event passing etc.
