@@ -16,4 +16,5 @@ target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 # LINK TO OTHER MODULES
 target_link_libraries(${target} PRIVATE 
    ${project}::Platform
+   ${project}::Windows
 )

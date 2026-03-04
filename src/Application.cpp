@@ -28,7 +28,7 @@ void Application::run(){
    static int A { 0 };
 
    while(running_){
-      Fig::EventQueue events = platform_->PollEvents();
+      Fig::EventQueue events = platformRootWindow_->pollEvents();
       for(std::size_t i { 0 }; i < events.size(); ++i){
          processEvent(events.at(i));
       }

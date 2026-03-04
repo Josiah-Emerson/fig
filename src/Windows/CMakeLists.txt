@@ -1,17 +1,19 @@
 set(dir "Windows")
 set(target "${project}_${dir}")
 message(STATUS "${target} module")
-add_library(${target} INTERFACE) # TODO: remove interface when cpp files are added
+add_library(${target}) # TODO: remove interface when cpp files are added
 add_library("${project}::${dir}" ALIAS ${target})
 
 # SOURCES
 # TODO: Add sources when we have cpp files for this dir 
-# target_sources(${target} PRIVATE 
-#  ${target}/Render.cpp
-#)
+target_sources(${target} PRIVATE 
+    ${target}/LinuxRootWindow.cpp
+)
 
 # INCLUDE DIRECTORY
-# target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # LINK TO OTHER MODULES
-# target_link_lbraries(${target} PRIVATE )
+target_link_libraries(${target} PRIVATE 
+   ${project}::Fig
+)

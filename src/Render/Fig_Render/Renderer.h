@@ -1,13 +1,13 @@
 #pragma once 
-#include "Fig_Platform/Platform.h"
+#include "Fig_Windows/IWindow.h"
 // TODO: Nowhere near final 
 
 class Renderer{
    private: 
-      Platform& platform_;
+      PlatformRootWindow& platform_;
 
    public: 
-      Renderer(Platform& platform)
+      Renderer(PlatformRootWindow& platform)
          : platform_ { platform }
       { }
 

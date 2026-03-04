@@ -1,5 +1,5 @@
 #pragma once 
-#include "Fig_Platform/Platform.h"
+#include "Fig_Windows/IWindow.h" // PlatformRootWindow
 #include "Fig_Engine/Engine.h"
 #include "Fig_Render/Renderer.h"
 #include "Ui.h"
@@ -7,18 +7,18 @@
 
 class Application{
    private: 
-      std::unique_ptr<Platform> platform_;
+      std::unique_ptr<PlatformRootWindow> platformRootWindow_;
       std::unique_ptr<Engine> engine_;
       std::unique_ptr<Renderer> renderer_;
       std::unique_ptr<Ui> ui_;
       bool running_ { true };
 
    public: 
-      Application(std::unique_ptr<Platform> platform)
-      : platform_ { std::move(platform) }
+      Application( std::unique_ptr<PlatformRootWindow> platformRootWindow)
+      : platformRootWindow_ { std::move(platformRootWindow) }
       , engine_ { std::make_unique<Engine>() }
-      , renderer_ {std::make_unique<Renderer>(*platform_.get()) }
-      , ui_ { std::make_unique<Ui>(*platform_.get()) }
+      , renderer_ {std::make_unique<Renderer>(*platformRootWindow_.get()) }
+      , ui_ { std::make_unique<Ui>(*platformRootWindow_.get()) }
       {
       }
       // TODO: Big 5? TBD

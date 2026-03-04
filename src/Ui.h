@@ -1,15 +1,15 @@
 #pragma once
-#include "Fig_Platform/Platform.h"
+#include "Fig_Windows/IWindow.h"
 // TODO: Very temporary, not sure how I want to go about doing this yet 
 // Some very different approaches exist (see ehre vs tracy for imgui
 
 
 class Ui{
    private: 
-      Platform& platform_;
+      PlatformRootWindow& platform_;
 
    public: 
-      Ui(Platform& platform)
+      Ui(PlatformRootWindow& platform)
          : platform_ { platform }
       { }
 
