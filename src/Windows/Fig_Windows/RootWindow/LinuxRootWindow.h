@@ -1,5 +1,5 @@
 #pragma once
-#include "IWindow.h"
+#include "Fig_Windows/IWindow.h"
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 

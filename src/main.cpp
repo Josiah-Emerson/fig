@@ -1,8 +1,8 @@
 #include "Application.h"
-#if defined(WIN32)// TODO: Update to Fig_Window/XXXRootWindow.h if we stick with it
+#if defined(WIN32)// TODO: Update to Fig_Window/RootWindow/XXXRootWindow.h if we stick with it
 #include "Fig_Platform/Win32Platform.h"
 #elif defined(LINUX)
-#include "Fig_Windows/LinuxRootWindow.h"
+#include "Fig_Windows/RootWindow/LinuxRootWindow.h"
 #elif defined(OSX)
 #include "Fig_Platform/OSXPlatform.h"
 #endif

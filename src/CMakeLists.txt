@@ -15,7 +15,6 @@ message(STATUS "Adding subdirectories")
 # Future optional/different subdirectory branching logic would go here
 add_subdirectory(Engine)
 add_subdirectory(Fig)
-add_subdirectory(Platform)
 add_subdirectory(Render)
 add_subdirectory(Windows)
 
@@ -29,7 +28,6 @@ target_sources(${project} PRIVATE
 
 target_link_libraries(${project} PRIVATE 
    ${project}::Engine
-   ${project}::Platform
    ${project}::Windows
    ${project}::Render
 )

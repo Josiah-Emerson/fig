@@ -52,8 +52,4 @@ namespace  Fig{
 
    using EventQueue = std::vector<Event>;
 
-   struct Vec2i{
-      int x;
-      int y;
-   };
 }

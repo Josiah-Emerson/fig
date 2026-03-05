@@ -6,7 +6,7 @@ add_library("${project}::${dir}" ALIAS ${target})
 
 # SOURCES
 # TODO: Add sources when we have cpp files for this dir 
-target_sources(${target} PUBLIC 
+target_sources(${target} PRIVATE 
    ${target}/Renderer.cpp
 )
 
@@ -14,7 +14,6 @@ target_sources(${target} PUBLIC
 target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # LINK TO OTHER MODULES
-target_link_libraries(${target} PRIVATE 
-   ${project}::Platform
+target_link_libraries(${target} PUBLIC 
    ${project}::Windows
 )

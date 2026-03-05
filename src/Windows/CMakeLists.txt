@@ -7,13 +7,15 @@ add_library("${project}::${dir}" ALIAS ${target})
 # SOURCES
 # TODO: Add sources when we have cpp files for this dir 
 target_sources(${target} PRIVATE 
-    ${target}/LinuxRootWindow.cpp
+   ${target}/RootWindow/LinuxRootWindow.cpp
+   ${target}/RootWindow/OSXRootWindow.cpp
+   ${target}/RootWindow/Win32RootWindow.cpp
 )
 
 # INCLUDE DIRECTORY
 target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # LINK TO OTHER MODULES
-target_link_libraries(${target} PRIVATE 
+target_link_libraries(${target} PUBLIC 
    ${project}::Fig
 )
