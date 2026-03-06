@@ -1,10 +1,12 @@
 #pragma once
 #include "Fig_Fig/Events.h"
-#include "Fig_Fig/Utils.h"
+#include "Fig_Fig/Primitives.h"
 #include <memory> // std::shared_ptr
 
 class PlatformWindow;
 
+// TODO: probably a good idea to have some internal functionality for when the size is updated to let the parent window know
+// For example: update a window and it needs to ask/let its parent know its new pos/size and then the parent checks to make sure it can 
 class IWindow {
    public: 
       virtual ~IWindow() = default;
@@ -23,6 +25,9 @@ class IWindow {
       Fig::Vec2i size_;
 
    private: 
+      // TODO: How to ensure invariant here with the parent and root window pointer 
+      // being the same as what is held in the tree. Should we just remove this and 
+      // define getRoot/ParentWindow funcs differently?
       // TODO: Decide better hierarchy (i.e. should LinuxPlatform be a type of window? Should it own a window?)
       std::shared_ptr<PlatformWindow> rootWindow_; // null if this window is the root 
       std::shared_ptr<IWindow> parentWindow_;

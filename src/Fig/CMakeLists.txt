@@ -1,16 +1,25 @@
-set(dir "Fig")
-set(target "${project}_${dir}")
-message(STATUS "${target} module")
-add_library(${target} INTERFACE) # TODO: Remove interface when adding cpp files
-add_library("${project}::${dir}" ALIAS ${target})
+message(STATUS "Configuring executable ${project}")
 
-# SOURCES
-# TODO: Add sources when we have cpp files for this dir 
-# target_sources(${target} PUBLIC Fig.cpp)
+# COMPILE FEATURES
 
-# INCLUDE DIRECTORY
-# TODO: see what happens when we don't target include dirs 
-target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(${project})
 
-# LINK TO OTHER MODULES (Maybe need this maybe don't?)
-# target_link_lbraries(${target} PRIVATE )
+
+
+# TARGET SOURCES
+target_sources(${project} PRIVATE
+   #${imgui_files}
+   main.cpp
+   TestPrintLayer.cpp
+)
+
+# LINK MODULES FROM CORE
+target_link_libraries(${project} PRIVATE 
+   Core
+)
+
+# TODO: When include dirs
+#target_include_directories(${project} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_compile_options(${project} PRIVATE -Wsign-conversion)
+target_compile_features(${project} PUBLIC cxx_std_20)

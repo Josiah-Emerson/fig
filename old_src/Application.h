@@ -1,4 +1,5 @@
 #pragma once 
+#include "Fig_Fig/Tree.h"
 #include "Fig_Windows/IWindow.h" // PlatformRootWindow
 #include "Fig_Engine/Engine.h"
 #include "Fig_Render/Renderer.h"
@@ -7,7 +8,7 @@
 
 class Application{
    private: 
-      std::unique_ptr<PlatformRootWindow> platformRootWindow_;
+      Fig::WindowTree windowTree_;
       std::unique_ptr<Engine> engine_;
       std::unique_ptr<Renderer> renderer_;
       std::unique_ptr<Ui> ui_;
@@ -15,11 +16,12 @@ class Application{
 
    public: 
       Application( std::unique_ptr<PlatformRootWindow> platformRootWindow)
-      : platformRootWindow_ { std::move(platformRootWindow) }
+      : windowTree_ { std::move(platformRootWindow) }
       , engine_ { std::make_unique<Engine>() }
-      , renderer_ {std::make_unique<Renderer>(*platformRootWindow_.get()) }
-      , ui_ { std::make_unique<Ui>(*platformRootWindow_.get()) }
+      , renderer_ {std::make_unique<Renderer>(*platformRootWindow.get()) }
+      , ui_ { std::make_unique<Ui>(*platformRootWindow.get()) }
       {
+
       }
       // TODO: Big 5? TBD
 
