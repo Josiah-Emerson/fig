@@ -7,6 +7,7 @@ target_sources(${target} PRIVATE
    Layer.cpp
 )
 
+add_subdirectory(ImGui)
 add_subdirectory(Window)
 
 target_link_libraries(${target} PUBLIC 

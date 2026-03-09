@@ -55,7 +55,7 @@ namespace Core{
          }
 
          // TODO: Delete this when we don't need it 
-         void toString(){
+         void print(){
             switch(type){
                case(NULL_EVENT):
                   std::cout << "NULL_EVENT\n";

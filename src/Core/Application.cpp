@@ -10,7 +10,7 @@ namespace Core{
    {
       s_application = this;
       m_specification.windowSpec.eventCallback = [this](Core::Events::Event& event) { raiseEvent(event); };
-      m_window = Core::Window::getWindow(appSpec.windowSpec);
+      m_window = Core::Window::createWindow(m_specification.windowSpec);
    }
 
    Application::~Application(){
@@ -22,6 +22,7 @@ namespace Core{
       m_running = true;
 
       while(m_running){
+         m_window->newImGuiFrame();
          m_window->pollEvents();
 
          // TODO: if we should have a reason to close from the window 
@@ -58,6 +59,10 @@ namespace Core{
          if(layer->onEvent(event)) // true if layer handles it
             return;
       }
+   }
+
+   Application& Application::get(){
+      return *s_application;
    }
 
 } // namespace Core

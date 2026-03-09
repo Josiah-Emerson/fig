@@ -8,14 +8,15 @@ add_executable(${project})
 
 # TARGET SOURCES
 target_sources(${project} PRIVATE
-   #${imgui_files}
    main.cpp
-   TestPrintLayer.cpp
+   OverlayLayer.cpp
+   UnderLayer.cpp
 )
 
 # LINK MODULES FROM CORE
 target_link_libraries(${project} PRIVATE 
    Core
+   Core::ImGui
 )
 
 # TODO: When include dirs

@@ -12,12 +12,14 @@ namespace Core{
          void update() override; // swapBuffers
          void pollEvents() override;
          void raiseEvent(Events::Event& event) override; // TODO: why public?
-         
+         void newImGuiFrame() override;
+
       private: 
          // returns an array of Core::Events::Event of size out_numEvents in out_events
          // NOTE: delete[] out_events because out_events is dynamically allocated on heap
          std::vector<Events::Event> translateXEventToFigEvents(XEvent* event);
          Events::Key translateXKeyToFigKey(XKeyEvent* keyEvent);
+         void initImGui() override;
 
       private:
          Display* m_XDisplay;

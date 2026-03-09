@@ -4,6 +4,9 @@
 #include <X11/Xlib.h>
 #include <cassert>
 #include <stdexcept>
+#include <imgui.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_x11.h>
 
 namespace Core{
    // NOTE: spec can be a default param (see header file), but cannot be redefined here
@@ -62,6 +65,13 @@ namespace Core{
 
 
    void LinuxWindow::update(){
+      // TODO: Should ImGui::Render() be here?
+      ImGui::Render();
+      ImDrawData* imGuiDrawData = ImGui::GetDrawData();
+      if(imGuiDrawData){
+         ImGui_ImplOpenGL3_RenderDrawData(imGuiDrawData);
+      }
+
       glXSwapBuffers(m_XDisplay, m_glxWindow);
    }
 
@@ -69,10 +79,13 @@ namespace Core{
       while(XPending(m_XDisplay) > 0){
          XEvent event {};
          XNextEvent(m_XDisplay, &event);
-         // ImGui_ImplX11_ProcessEvent(&event);
          // TODO: The funky part here is that we need to be able to pass imgui the XEvent
          // Does it matter that we pass it here? Will layers be able to check if imgui wants it? What if imgui isn't init here?
          // Do we need to pass underlying XEvent as part of the Core::Events::Event? How would this work for other OS's which don't need it passed in automatically?
+         // For now we will just pass the event here and the layer can either choose to listen if io wants it or not. 
+         // NOTE: Possible issue: ImGui uses this event but a layer higher up which doesn't care about imgui handles the event. In this case both the layer 
+         // and imgui 'handle' or use this event which is probably not what we want
+         ImGui_ImplX11_ProcessEvent(&event);
          std::vector<Events::Event> events = translateXEventToFigEvents(&event);
 
          for(Events::Event& e : events){
@@ -134,6 +147,12 @@ namespace Core{
       return events;
    }
 
+   void LinuxWindow::newImGuiFrame(){
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplX11_NewFrame();
+      ImGui::NewFrame();
+   }
+
    Events::Key LinuxWindow::translateXKeyToFigKey(XKeyEvent* keyEvent){
       KeySym keySym = XLookupKeysym(keyEvent, 0);
 
@@ -142,6 +161,19 @@ namespace Core{
          case(XK_Escape): return Key::ESCAPE;
          default: return Key::OTHER;
       }
+   }
+
+
+   // TODO: If more complicated and need multiple different contexts, may need to move imgui from being a window controlled thing
+   void LinuxWindow::initImGui(){
+      IMGUI_CHECKVERSION();
+      ImGui::CreateContext();
+      ImGuiIO& io = ImGui::GetIO();
+      io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // ImGuiConfigFlags_NavEnableGamepad
+      ImGui::StyleColorsDark();
+
+      ImGui_ImplX11_InitForOpenGL(m_XDisplay, &m_XWindow);
+      ImGui_ImplOpenGL3_Init();
    }
 
 } // namespace Core

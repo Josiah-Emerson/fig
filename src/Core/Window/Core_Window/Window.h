@@ -26,10 +26,11 @@ namespace Core{
          virtual void update() = 0; // swapBuffers
          virtual void pollEvents() = 0; // For now this should be common window function regardless of OS
          virtual void raiseEvent(Core::Events::Event& event) = 0;
+         virtual void newImGuiFrame() = 0;
 
          // does ifdefs to return proper platform window
          // returns nullptr if nothing
-         static std::shared_ptr<Window> getWindow(const WindowSpec& spec = WindowSpec() );
+         static std::shared_ptr<Window> createWindow(const WindowSpec& spec = WindowSpec() );
 
          // TODO: Funcs from cherno's architeture series 
          // getFrameBufferSize();
@@ -38,6 +39,7 @@ namespace Core{
          // getHandle(); 
 
       protected: 
+         virtual void initImGui() = 0;
          virtual void updatePosition(int x, int y) { 
             m_windowSpec.x = x; 
             m_windowSpec.y = y; 

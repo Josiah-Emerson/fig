@@ -8,6 +8,7 @@ add_library("Core::${dir}" ALIAS ${target})
 target_sources(${target} PRIVATE 
    ${target}/LinuxWindow.cpp
    ${target}/Window.cpp
+   ${imgui_files}
 )
 
 # INCLUDE DIRECTORY
