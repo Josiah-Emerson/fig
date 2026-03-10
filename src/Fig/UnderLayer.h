@@ -12,5 +12,10 @@ class UnderLayer : public Core::Layer{
       void onRender() override;
 
    private: 
+      float clampAndNormalize(int* val);
+
+      int m_red { 0 };
+      int m_green { 0 };
+      int m_blue { 0 };
       Core::ImGuiContainer m_imGuiContainer;
 };

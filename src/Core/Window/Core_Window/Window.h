@@ -27,6 +27,8 @@ namespace Core{
          virtual void pollEvents() = 0; // For now this should be common window function regardless of OS
          virtual void raiseEvent(Core::Events::Event& event) = 0;
          virtual void newImGuiFrame() = 0;
+         virtual int getWidth() { return m_windowSpec.width; }
+         virtual int getHeight() { return m_windowSpec.height; }
 
          // does ifdefs to return proper platform window
          // returns nullptr if nothing
