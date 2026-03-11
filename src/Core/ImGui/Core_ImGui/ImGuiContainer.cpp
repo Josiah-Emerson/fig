@@ -147,7 +147,8 @@ namespace Core{
          ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
 
       // TODO/NOTE: No idea what this does? TreeNodeEx checks if open and returns true. 
-      // If true then we need to pop it from the tree. I think the root node should have "" as its ID? Thats my best guess rn
+      // If true then we need to pop it from the tree. I think "" can be anything and just acts as an ID?
+      // Chaning to "a" or some other string works fine
       bool nodeOpen = ImGui::TreeNodeEx("", flags, "%s", node.name.c_str());
 
       if(!node.hasData)

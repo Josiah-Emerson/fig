@@ -2,8 +2,32 @@
 #include <GL/gl.h>
 
 UnderLayer::UnderLayer()
-   : m_imGuiContainer { m_red, m_green, m_blue }
-{ }
+   : m_imGuiPropertyEditor { nullptr }
+{ 
+   using namespace Core;
+   ImGuiPropertyEditor::DataNode rootNode;
+   ImGuiPropertyEditor::DataInfo redData{
+      "Red",
+      ImGuiDataType_S32,
+      &m_red
+   };
+   ImGuiPropertyEditor::DataInfo blueData{
+      "Blue",
+      ImGuiDataType_S32,
+      &m_blue
+   };
+   ImGuiPropertyEditor::DataInfo greenData{
+      "Green",
+      ImGuiDataType_S32,
+      &m_green
+   };
+   rootNode.name = "Colors";
+   rootNode.dataInfoArr.push_back(&redData);
+   rootNode.dataInfoArr.push_back(&blueData);
+   rootNode.dataInfoArr.push_back(&greenData);
+
+   m_imGuiPropertyEditor = std::make_unique<ImGuiPropertyEditor>(&rootNode, &m_open);
+}
 
 bool UnderLayer::onEvent(Core::Events::Event& event) {
    event.print();
@@ -11,7 +35,8 @@ bool UnderLayer::onEvent(Core::Events::Event& event) {
 }
 
 void UnderLayer::onUpdate(){
-   m_imGuiContainer.draw();
+   if(m_open)
+      m_imGuiPropertyEditor->draw();
 }
 
 void UnderLayer::onRender(){

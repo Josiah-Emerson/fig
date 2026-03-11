@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Layer.h"
-#include "Core_ImGui/ImGuiContainer.h"
+#include "Core_ImGui/ImGuiPropertyEditor.h"
+#include <memory>
 
 class UnderLayer : public Core::Layer{
    public:
@@ -17,5 +18,6 @@ class UnderLayer : public Core::Layer{
       int m_red { 0 };
       int m_green { 0 };
       int m_blue { 0 };
-      Core::ImGuiContainer m_imGuiContainer;
+      bool m_open = true;
+      std::unique_ptr<Core::ImGuiPropertyEditor> m_imGuiPropertyEditor;
 };

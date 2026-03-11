@@ -7,7 +7,7 @@ add_library("Core::${dir}" ALIAS ${target})
 # SOURCES
 target_sources(${target} PRIVATE
    ${imgui_files} # TODO: Is it okay to do target sources ?
-   ${target}/ImGuiContainer.cpp
+   ${target}/ImGuiPropertyEditor.cpp
 )
 
 # INCLUDE DIRECTORY
