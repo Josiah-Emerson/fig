@@ -1,6 +1,7 @@
 #pragma once
 #include "ImGuiContainer.h"
 #include <imgui.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,7 +25,7 @@ namespace Core{
             DataNode* parent { nullptr }; // nullptr if root node
             DataNode* firstChild { nullptr }; // nullptr if leaf 
             DataNode* nextSibling { nullptr }; // nullptr if last sibling 
-            std::vector< const DataInfo * > dataInfoArr; // empty if node does not contain data
+            std::vector< std::shared_ptr<DataInfo>> dataInfoArr;
          };
 
          struct DataInfo{
@@ -40,7 +41,7 @@ namespace Core{
             std::string name;
             int parentIdx; // -1 is parent -2 is no parent and not root (i.e. something went wrong, probably never added as child)
             std::vector<std::size_t> childIdx;
-            const std::vector< const DataInfo * > dataInfoArr;
+            std::vector< std::shared_ptr<DataInfo> > dataInfoArr;
 
             bool operator==(const Node& rhs) const;
          };

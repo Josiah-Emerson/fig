@@ -39,7 +39,8 @@ namespace Core{
          node->name, 
          node->parent ? -2 : -1, // if it has a parent -2 because we will need to add as child, if nullptr then it is root and can be -1
          {}, // empty childIdx vector
-         std::move( node->dataInfoArr )
+         //std::move( node->dataInfoArr )
+         node->dataInfoArr
       };
    }
 
@@ -95,7 +96,7 @@ namespace Core{
             std::string tempID = "##" + m_visibleNode->name;
             ImGui::PushID(tempID.c_str());
             if(!m_visibleNode->dataInfoArr.empty()){
-               for(const DataInfo* const dataInfo : m_visibleNode->dataInfoArr){
+               for(std::shared_ptr<DataInfo> dataInfo : m_visibleNode->dataInfoArr){
                   ImGui::TableNextRow();
                   tempID = "##" + dataInfo->propertyName; // TODO: When entering draw func, dataInfo->propertyName results in std::bad_alloc
                   ImGui::PushID(tempID.c_str()); // Push after row and before column so this ID is for the whole row ? Not sure

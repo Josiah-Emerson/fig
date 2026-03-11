@@ -22,9 +22,9 @@ UnderLayer::UnderLayer()
       &m_green
    };
    rootNode.name = "Colors";
-   rootNode.dataInfoArr.push_back(&redData);
-   rootNode.dataInfoArr.push_back(&blueData);
-   rootNode.dataInfoArr.push_back(&greenData);
+   rootNode.dataInfoArr.push_back( std::make_shared<ImGuiPropertyEditor::DataInfo>(redData) );
+   rootNode.dataInfoArr.push_back( std::make_shared<ImGuiPropertyEditor::DataInfo>(blueData) );
+   rootNode.dataInfoArr.push_back( std::make_shared<ImGuiPropertyEditor::DataInfo>(greenData) );
 
    m_imGuiPropertyEditor = std::make_unique<ImGuiPropertyEditor>(&rootNode, &m_open);
 }
