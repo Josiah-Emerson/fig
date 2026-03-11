@@ -1,4 +1,8 @@
+TODO: Work on openGL renderer
+TODO: Implement a Fig enum for datatypes and have imgui handle translating so that layers don't need to know about ImGuiDataType
+TODO: Implement Tree and refactor stuff to use that
 TODO: Implement actual structures for Fig::Events (and maybe begin actually handling them in app), 
+TODO: ImGuiWidgets folder (i.e. reusable widgets like color picker)
 
 
 

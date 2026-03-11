@@ -7,6 +7,8 @@
 
 namespace Core{
    // builds and displays a property editor based on the tree defined by rootNode in constructor
+   // TODO: Add functionality for passing a window size (possibly through the ImGuiContainer constructor)
+   // TODO: Add functionality for passing window flags or table flags (possible through ImGuiContainer or ImGuiPropertyEditor)
    class ImGuiPropertyEditor : public ImGuiContainer {
       public: 
          struct DataNode;
@@ -34,8 +36,6 @@ namespace Core{
             void* const data { nullptr };
          };
 
-         void draw() override;
-
       private: 
          struct Node{
             std::string name;
@@ -46,6 +46,7 @@ namespace Core{
             bool operator==(const Node& rhs) const;
          };
 
+         void internalDraw() override;
          // create Node from DataNode.
          // NOTE: If not root node, we still need to add as child
          Node createNode(const DataNode* const node);
@@ -53,7 +54,6 @@ namespace Core{
          std::size_t addNode(const Node& node);
          void addChild(std::size_t parentIdx, std::size_t childIdx);
          void buildTree(std::size_t parentIdx, const DataNode* const firstChild);
-         void drawTree();
          void drawTreeNode(const std::size_t nodeIdx);
 
          std::vector<Node> m_nodes;

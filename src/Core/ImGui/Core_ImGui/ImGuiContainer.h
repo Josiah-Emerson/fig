@@ -11,7 +11,8 @@ namespace Core{
          { }
          virtual ~ImGuiContainer() = default;
 
-         virtual void draw() { }
+         void draw();
+         // TODO: Not sure if this is needed since we can just pass getOpenBool() to the imgui func
          void windowShouldClose(){ 
             assert(m_open && "m_open is nullptr. This should never happen");
             *m_open = false;
@@ -20,6 +21,7 @@ namespace Core{
 
       protected: 
          bool* getOpenBool() { return m_open; }
+         virtual void internalDraw() = 0;
       private: 
          bool* m_open;
    };

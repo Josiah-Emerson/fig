@@ -1,5 +1,4 @@
 #include "ImGuiPropertyEditor.h"
-#include "Application.h"
 #include "imgui.h"
 
 namespace Core{
@@ -17,21 +16,6 @@ namespace Core{
    ImGuiPropertyEditor::~ImGuiPropertyEditor(){
    }
 
-   void ImGuiPropertyEditor::draw(){
-      const int WINDOW_HEIGHT = Application::get().getWindow()->getHeight();
-      const int WINDOW_WIDTH = Application::get().getWindow()->getWidth();
-      const int HEIGHT { WINDOW_HEIGHT / 2 };
-      const int WIDTH { 400 };
-
-      ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT));
-      ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - WIDTH, 0));
-      if(ImGui::Begin("Property Editor", getOpenBool()))
-         drawTree();
-
-      // NOTE: If we want to handle ImGui::Begin returning false, invert if statement, ensure we add 
-      // ImGui::End() in if statement, handle this, and then early return in if block
-      ImGui::End();
-   }
 
    // PRIVATE METHODS
    ImGuiPropertyEditor::Node ImGuiPropertyEditor::createNode(const DataNode* const node){
@@ -39,7 +23,6 @@ namespace Core{
          node->name, 
          node->parent ? -2 : -1, // if it has a parent -2 because we will need to add as child, if nullptr then it is root and can be -1
          {}, // empty childIdx vector
-         //std::move( node->dataInfoArr )
          node->dataInfoArr
       };
    }
@@ -70,7 +53,7 @@ namespace Core{
       buildTree(parentIdx, child->nextSibling);
    }
 
-   void ImGuiPropertyEditor::drawTree(){
+   void ImGuiPropertyEditor::internalDraw(){
       // Left Side
       const ImVec2 IMGUI_WINDOW_SIZE = ImGui::GetContentRegionAvail();
       if(ImGui::BeginChild("Tree", ImVec2(IMGUI_WINDOW_SIZE.x / 2, IMGUI_WINDOW_SIZE.y), 
