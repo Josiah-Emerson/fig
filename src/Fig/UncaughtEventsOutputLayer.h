@@ -4,9 +4,9 @@
 #include "Core_ImGui/ImGuiPropertyEditor.h"
 #include <memory>
 
-class UnderLayer : public Core::Layer{
+class UncaughtEventsOutputLayer : public Core::Layer{
    public:
-      UnderLayer();
+      UncaughtEventsOutputLayer();
 
       bool onEvent(Core::Events::Event& event) override;
       void onUpdate() override;

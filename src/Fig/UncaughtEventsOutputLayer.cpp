@@ -1,7 +1,7 @@
-#include "UnderLayer.h"
+#include "UncaughtEventsOutputLayer.h"
 #include <GL/gl.h>
 
-UnderLayer::UnderLayer()
+UncaughtEventsOutputLayer::UncaughtEventsOutputLayer()
    : m_imGuiPropertyEditor { nullptr }
 { 
    using namespace Core;
@@ -29,17 +29,17 @@ UnderLayer::UnderLayer()
    m_imGuiPropertyEditor = std::make_unique<ImGuiPropertyEditor>(&rootNode, &m_open);
 }
 
-bool UnderLayer::onEvent(Core::Events::Event& event) {
+bool UncaughtEventsOutputLayer::onEvent(Core::Events::Event& event) {
    event.print();
    return true;
 }
 
-void UnderLayer::onUpdate(){
+void UncaughtEventsOutputLayer::onUpdate(){
    if(m_open)
       m_imGuiPropertyEditor->draw();
 }
 
-void UnderLayer::onRender(){
+void UncaughtEventsOutputLayer::onRender(){
    glClearColor(  clampAndNormalize(&m_red),
                   clampAndNormalize(&m_green),
                   clampAndNormalize(&m_blue),
@@ -48,7 +48,7 @@ void UnderLayer::onRender(){
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-float UnderLayer::clampAndNormalize(int* val){
+float UncaughtEventsOutputLayer::clampAndNormalize(int* val){
    if(*val < 0){
       *val = 0;
    } else if(*val > 255){

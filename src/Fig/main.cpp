@@ -1,6 +1,6 @@
 #include "Application.h"
 #include "OverlayLayer.h"
-#include "UnderLayer.h"
+#include "UncaughtEventsOutputLayer.h"
 #include "TempLayer.cpp"
 
 int main(){
@@ -12,6 +12,6 @@ int main(){
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
    app.pushLayer<TempLayer>();
-   app.pushLayer<UnderLayer>();
+   app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }

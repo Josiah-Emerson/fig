@@ -11,7 +11,7 @@ target_sources(${project} PRIVATE
    main.cpp
    OverlayLayer.cpp
    TempLayer.cpp
-   UnderLayer.cpp
+   UncaughtEventsOutputLayer.cpp
 )
 
 # LINK MODULES FROM CORE

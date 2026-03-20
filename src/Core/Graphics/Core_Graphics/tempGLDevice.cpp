@@ -41,6 +41,5 @@ namespace Core{
 
          // OpenGL Funcs
          PFNGLGETINTEGERVPROC glGetIntegerv;
-
    };
 } // namespace Core
