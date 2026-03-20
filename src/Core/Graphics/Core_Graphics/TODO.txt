@@ -1,0 +1,30 @@
+Renderer: Has data such as VAOs and VBOs ( look into if we need to define these sepately for openGL specific impl )
+   - See https://github.com/PixelRifts/easy-renderer/blob/master/src/render_demo.c for basic implementation
+   - Maybe try to define shapes (i.e. triangles and quads) that we can keep impl agnostic and render? Is this important?
+   - If we did something like rendererImpl : renderer (renderer has basic VAO and VBO funcs), how would we get VAO and VBO data to and from the rendererImpl object 
+and what we actually want to render?
+
+I think we will at least want to write an object for VBOs and VAOs
+
+openGL pipeline:
+
+Step 1: Vertex Specification: 
+OpenGL wiki summary: Vertex Specification is the process of setting up the necessary objects for rendering with a particular shader program, 
+as well as the process of using those objects to render. (NOTE: this summary seems to include the shader programs from diagram, essentially first 3 steps into one) 
+
+My summary: Specify all the vertex and attributes. Can either render in order of vertexes or provide an order of indices to render 
+
+VAOs: Stores state needed to supply vertex data. Also REFERENCES the VBO(s?), meaning that changes in VBOs do not mean VAOs change, 
+but the VBO changes are still represente via the reference
+
+VBOs: Source for vertex array data
+
+
+Bits of help:
+Identical objects, should there be a different shader program for each or just one: 
+ - Why don't you upload new uniforms for each object? You group all your objects that have the same shader-program together, then you cal glUseProgram 
+for this program, and then for each object you upload the respective uniform data, and after you uploaded the uniform data for an object you can call glDraw. 
+Then you upload the uniform data for the next object and call glDraw, and you don't need to call glUseProgram again because you are already using that program.
+I think switching the shader-program for each object might become a bottleneck.
+
+

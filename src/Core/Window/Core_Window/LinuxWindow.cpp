@@ -3,6 +3,7 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <cassert>
+#include <cstring>
 #include <stdexcept>
 #include <imgui.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -151,6 +152,35 @@ namespace Core{
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplX11_NewFrame();
       ImGui::NewFrame();
+   }
+
+   void (*LinuxWindow::getProcAddress(char* procName)) () {
+      /*
+      // TODO: Is this fine here in the LinuxWIndow? What if we don't use openGL?
+      // Query extensions list to ensure it is supported
+      const char* extensionsList = glXQueryExtensionsString(m_XDisplay, XDefaultScreen(m_XDisplay));
+      char* extensionsCopy = new char[strlen(extensionsList) + 1]; // TODO: IMPORTANT!!! WHEN THIS FUNC GETS REFACTORED (and will probably best to store this as a member var of the window class?) move the creation and delete[] (if using c strings) into constructor and destructor!!!!
+      strcpy(extensionsCopy, extensionsList);
+      if(strcmp(extensionsCopy, "") == 0){ // empty string
+         delete[] extensionsCopy;
+         return nullptr;
+      }
+      char* token = strtok(extensionsCopy, " ");
+      while(token){
+         puts(token);
+         if(strcmp(token, procName) == 0){ // procName is supported
+            delete[] extensionsCopy;
+            return glXGetProcAddress((GLubyte*) procName);
+         }
+         token = strtok(NULL, " ");
+      }
+
+      delete[] extensionsCopy;
+      return nullptr;
+      */ 
+      // The above commented out code parses and extension list to see if the procName is supported in the available extensions. Could be useful in the future
+
+      return glXGetProcAddress((GLubyte*) procName);
    }
 
    Events::Key LinuxWindow::translateXKeyToFigKey(XKeyEvent* keyEvent){

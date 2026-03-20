@@ -10,6 +10,7 @@ add_executable(${project})
 target_sources(${project} PRIVATE
    main.cpp
    OverlayLayer.cpp
+   TempLayer.cpp
    UnderLayer.cpp
 )
 
@@ -17,6 +18,7 @@ target_sources(${project} PRIVATE
 target_link_libraries(${project} PRIVATE 
    Core
    Core::ImGui
+   Core::Graphics
 )
 
 # TODO: When include dirs

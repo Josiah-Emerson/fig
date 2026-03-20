@@ -13,6 +13,7 @@ namespace Core{
          void pollEvents() override;
          void raiseEvent(Events::Event& event) override; // TODO: why public?
          void newImGuiFrame() override;
+         void (*getProcAddress(char* procName)) () override;
 
       private: 
          // returns an array of Core::Events::Event of size out_numEvents in out_events

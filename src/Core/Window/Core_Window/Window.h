@@ -30,6 +30,11 @@ namespace Core{
          virtual int getWidth() { return m_windowSpec.width; }
          virtual int getHeight() { return m_windowSpec.height; }
 
+         // return procedure address of a specified procedure
+         // returns nullptr if address not found
+         // NOTE: This may be deeply coupled to openGL loading functions but for now oh well
+         virtual void (*getProcAddress(char* procName)) () = 0;
+
          // does ifdefs to return proper platform window
          // returns nullptr if nothing
          static std::shared_ptr<Window> createWindow(const WindowSpec& spec = WindowSpec() );

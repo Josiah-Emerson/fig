@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "OverlayLayer.h"
 #include "UnderLayer.h"
+#include "TempLayer.cpp"
 
 int main(){
    Core::ApplicationSpec appSpec;
@@ -10,6 +11,7 @@ int main(){
 
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
+   app.pushLayer<TempLayer>();
    app.pushLayer<UnderLayer>();
    app.run();
 }
