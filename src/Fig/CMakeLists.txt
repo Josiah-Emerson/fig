@@ -10,8 +10,8 @@ add_executable(${project})
 target_sources(${project} PRIVATE
    main.cpp
    OverlayLayer.cpp
-   TempLayer.cpp
    UncaughtEventsOutputLayer.cpp
+   VectorTestLayer.cpp
 )
 
 # LINK MODULES FROM CORE
@@ -19,6 +19,7 @@ target_link_libraries(${project} PRIVATE
    Core
    Core::ImGui
    Core::Graphics
+   Core::Utils # TODO: take this out when done testing if we don't need this
 )
 
 # TODO: When include dirs

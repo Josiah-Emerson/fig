@@ -9,6 +9,7 @@ target_sources(${target} PRIVATE
 
 add_subdirectory(Graphics)
 add_subdirectory(ImGui)
+add_subdirectory(Utils)
 add_subdirectory(Window)
 
 target_link_libraries(${target} PUBLIC 

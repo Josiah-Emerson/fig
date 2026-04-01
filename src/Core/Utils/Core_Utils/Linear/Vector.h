@@ -1,0 +1,326 @@
+#pragma once
+#include "Core_Utils/Concepts.h"
+#include <cassert>
+#include <cmath>
+#include <initializer_list>
+#include <ostream>
+#include <type_traits>
+
+/*
+ * Provides useful types and associated functions with vectors. This is meant in the Linear Algebra sense of the word, and not in the std::Vector sense
+ */
+
+namespace Core{
+   namespace Linear{
+
+      // Creates an N x 1 column vector of type T, where T is numeric (treated as column for now because we like matrix vector multiplation) 
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      class Vector{
+         public: 
+
+            // Creates a vector of size N with all elements intialized to 0
+            Vector();
+
+            // Creates a vector of size N with all elements initialized to val
+            Vector(T val);
+
+            // TODO: For below two constructors: if size N is dictated by size of vals/args, then update the description to that
+            // Otherwise, if this is not the case, update the description to reflect that any unspecified elements will be either 1 or 0 (TBD)
+
+            // Creates a vector where vals specify the elements
+            Vector(std::initializer_list<T> vals);
+
+            // Creates a vector where args specify the elements
+            template<typename... Args>
+            requires(sizeof...(Args) <= N &&
+                    (std::is_same_v<Args, T> && ...))
+            Vector(Args... args);
+
+            // TODO: Big 5 if needed
+            Vector(const Vector& v) = default; // copy constructor
+            Vector(Vector&& v) = default; // move constructor
+            Vector& operator=(const Vector& v) = default; // copy assignment
+            Vector& operator=(Vector&& v)= default; // move assignment
+            ~Vector() = default;
+
+            // Operators
+            template<typename U>
+            requires(Concepts::numeric<U>)
+            Vector<std::common_type_t<T, U>, N> operator*(U scalar) const;
+
+            // element-wise multiplation
+            template<typename U>
+            requires(Concepts::numeric<U>)
+            Vector<std::common_type_t<T, U>, N> operator*(Vector<U, N> rhs) const;
+
+            template<typename U>
+            requires(Concepts::numeric<U>)
+            Vector<std::common_type_t<T, U>, N> operator+(Vector<U, N> rhs) const;
+
+            template<typename U>
+            requires(Concepts::numeric<U>)
+            Vector<std::common_type_t<T, U>, N> operator-(Vector<U, N> rhs) const;
+
+            // accessor
+            T& operator[](std::size_t i);
+            const T& operator[](std::size_t i) const;
+
+            // Methods
+            double magnitude() const;
+            void normalize();
+
+            // returns a vector of length 1 in the direction of this vector
+            Vector unitVector() const;
+            
+            // TODO: Funcs below are helpful for now when working on the class, but probably don't actually want it public or at all?
+            void fill(T val);
+         private: 
+            T m_data[N];
+      };
+
+      /*
+       *
+       * COMMON TYPEDEFS
+       *
+       */
+      typedef Vector<int, 3> ivec3;
+      typedef Vector<float, 3> fvec3;
+      typedef Vector<double, 3> dvec3;
+      typedef Vector<int, 4> ivec4;
+      typedef Vector<float, 4> fvec4;
+      typedef Vector<double, 4> dvec4;
+
+      /*
+       *
+       * FREE METHOD DECLARATIONS
+       *
+       */
+
+      // returns the cross product of 2 3D vectors using the right hand rule
+      // NOTE: Assumes i, j, and k are 1
+      template<typename T, typename U>
+      requires(Concepts::numeric<T> && Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, 3> crossProduct(Vector<T, 3> a, Vector<U, 3> b);
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      std::ostream& operator<<(std::ostream& out, const Vector<T, N> v);
+
+      // Non-member function so we can do scalar * vector not just vector * scalar
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T> && Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> operator*(U scalar, const Vector<T, N>& vector);
+
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T> && Concepts::numeric<U>)
+      double dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
+
+      /*
+       *
+       * VECTOR CLASS IMPLEMENTATION
+       *
+       */
+
+
+      /*
+       *
+       * PUBLIC METHODS
+       *
+       */
+
+      /*
+       *
+       * CONSTRUCTORS, DESTRUCTORS and ASSIGNMENT
+       *
+       */
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Vector<T, N>::Vector()
+         : Vector(0)
+      { }
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Vector<T, N>::Vector(T val){
+         fill(val);
+      }
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Vector<T, N>::Vector(std::initializer_list<T> vals){
+         // TODO: Should we just throw an exception here?
+         assert(vals.size() <= N && "Values given is larger than size of the vector");
+
+         for(std::size_t i { 0 }; i < vals.size(); ++i){
+            m_data[i] = vals.begin()[i];
+         }
+
+         if(vals.size() < N){
+            for(std::size_t i { vals.size() }; i < N; ++i){
+               m_data[i] = 0;
+            }
+         }
+      }
+
+      // Disgusting signature, but it just forwards args to the initializer list constructor above
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      template<typename... Args> requires(sizeof...(Args) <= N && (std::is_same_v<Args, T> && ...))
+      Vector<T, N>::Vector(Args... args)
+         : Vector({ cast<T>(args)... })
+         { }
+
+      /*
+       *
+       * OPERATORS
+       *
+       */
+
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      template<typename U> requires(Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator*(U scalar) const{
+         Vector<std::common_type_t<T, U>, N> res;
+         for(std::size_t i { 0 }; i < N; ++i)
+            res[i] = scalar * m_data[i];
+
+         return res;
+      }
+
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      template<typename U> requires(Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator*(Vector<U, N> rhs) const{
+         Vector<std::common_type_t<T, U>, N> temp;
+         for(std::size_t i { 0 }; i < N; ++i)
+            temp[i] = (*this)[i] * rhs[i];
+
+         return temp;
+      }
+
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      template<typename U> requires(Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator+(Vector<U, N> rhs) const{
+         Vector<std::common_type_t<T, U>, N> res;
+         for(std::size_t i { 0 }; i < N; ++i)
+            res[i] = (*this)[i] + rhs[i];
+
+         return res;
+      }
+
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      template<typename U> requires(Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator-(Vector<U, N> rhs) const{
+         Vector<std::common_type_t<T, U>, N> res;
+         for(std::size_t i { 0 }; i < N; ++i)
+            res[i] = (*this)[i] - rhs[i];
+
+         return res;
+      }
+
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      T& Vector<T, N>::operator[](std::size_t i){
+         // TODO: Should we just throw an exception here?
+         assert(i < N && "Out of bounds");
+         return m_data[i];
+      }
+
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      const T& Vector<T, N>::operator[](std::size_t i) const {
+         // TODO: Should we just throw an exception here?
+         assert(i < N && "Out of bounds");
+         return m_data[i];
+      }
+
+      /*
+       *
+       * PUBLIC MEMBER OPERATIONS
+       *
+       */
+
+      template<typename T, std::size_t N> 
+      requires(Concepts::numeric<T>)
+      double Vector<T, N>::magnitude() const{
+         // TODO: At some point add a check to see if our values get to a point where we are losing precision
+         double total { 0 };
+         for(std::size_t i { 0 }; i < N; ++i)
+            total += m_data[i] * m_data[i];
+
+         return std::sqrt(total);
+      }
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      void Vector<T,N>::normalize(){
+         double mag { magnitude() };
+         for(std::size_t i { 0 }; i < N; ++i){
+            m_data[i] /= mag;
+         }
+      }
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Vector<T,N> Vector<T, N>::unitVector() const{
+         Vector<T, N> temp = *this;
+         temp.normalize();
+         return temp;
+      }
+
+      template<typename T, std::size_t N> 
+      requires(Concepts::numeric<T>)
+      void Vector<T, N>::fill(T val){
+         for(std::size_t i { 0 }; i < N; ++i){
+            m_data[i] = val;
+         }
+      }
+
+
+      /*
+       *
+       * END OF IMPLEMENTATION
+       *
+       */
+
+
+      /*
+       *
+       * FREE VECTOR METHODS
+       *
+       */
+      // output overload: 
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      std::ostream& operator<<(std::ostream& out, const Vector<T, N> v){
+         out << '(';
+         for(std::size_t i { 0 }; i < N - 1; ++i){
+            out << v[i] << ", ";
+         }
+         out << v[ N - 1] << ")";
+         
+         return out;
+      }
+      
+      // Non-member function so we can do scalar * vector not just vector * scalar
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T> && Concepts::numeric<U>)
+      Vector<std::common_type_t<T, U>, N> operator*(U scalar, const Vector<T, N>& vector){
+         return vector * scalar;
+      }
+
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T> && Concepts::numeric<U>)
+      double dotProduct(const Vector<T, N>& a, const Vector<U, N>& b){
+         auto vec = a * b;
+         double res { 0 };
+         for(std::size_t i { 0 }; i < N; ++i){
+            res += vec[i];
+         }
+
+         return res;
+      }
+
+   } // namespace Linear
+} // namespace Core

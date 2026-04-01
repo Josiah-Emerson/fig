@@ -1,3 +1,5 @@
+For now just go with openGL. No point in keeping things abstract since idek what other graphics pipelines look like, and nor do I care at the moment
+
 Renderer: Has data such as VAOs and VBOs ( look into if we need to define these sepately for openGL specific impl )
    - See https://github.com/PixelRifts/easy-renderer/blob/master/src/render_demo.c for basic implementation
    - Maybe try to define shapes (i.e. triangles and quads) that we can keep impl agnostic and render? Is this important?
@@ -7,6 +9,35 @@ and what we actually want to render?
 I think we will at least want to write an object for VBOs and VAOs
 
 openGL pipeline:
+broad overview:
+1) Vertex processing 
+   a) each vertex retrieved from vertex arrays (as defined by VAO) is acted upon by the vertex shader. Each vertex in stream is processed in turn nto an output vertex
+   b) optional primitive tesselation stage
+   c) optional geometric shader primitive processing (output is a sequence of primitives)
+
+2) Vertex Post-Processing
+   a) Transform feedback happens here
+   b) Primitive assemply
+   c) Primitive clipping, the perspective divide, and the viewport transform to window space
+
+3) Scan conversion and primitive parameter interpolation, which generates a number of Fragments.
+
+4) A Fragment shader processes each fragment. Each fragment generates a number of outputs 
+
+5) Per sample processing (see openGL wiki if we need to care about this)
+
+Things we MUST (i.e. MANDATORY) specify and care about: 
+   - Define verticies (1)
+   - provide vertex shader (1a)
+
+Things we CAN (i.e. OPTIONAL) specify and care about:
+   - primitive tesselation (1b)
+   - geometric shader primitive processing (1c)
+   - Fragment shader (4)
+   - perhaps others
+
+
+
 
 Step 1: Vertex Specification: 
 OpenGL wiki summary: Vertex Specification is the process of setting up the necessary objects for rendering with a particular shader program, 

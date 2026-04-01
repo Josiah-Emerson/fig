@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "OverlayLayer.h"
 #include "UncaughtEventsOutputLayer.h"
-#include "TempLayer.cpp"
+#include "VectorTestLayer.h"
 
 int main(){
    Core::ApplicationSpec appSpec;
@@ -11,7 +11,7 @@ int main(){
 
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
-   app.pushLayer<TempLayer>();
+   app.pushLayer<VectorTestLayer>();
    app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }

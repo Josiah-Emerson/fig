@@ -4,6 +4,8 @@ TODO: Implement Tree and refactor stuff to use that
 TODO: Implement actual structures for Fig::Events (and maybe begin actually handling them in app), 
 TODO: ImGuiWidgets folder (i.e. reusable widgets like color picker)
 
+TODO: Vision for future is to have array simple structs represent particles and such, and hold the basic info such as position and mass (i.e. data oriented approach)
+for doing the physics on them, and then when we render have perhaps a pointer to a render object 
 
 
 Stuff for EulerMaruyama solver ( might be changed up later)
