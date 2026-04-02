@@ -1,6 +1,6 @@
 #pragma once
-
 #include <type_traits>
+
 namespace Core{
    namespace Concepts{
 

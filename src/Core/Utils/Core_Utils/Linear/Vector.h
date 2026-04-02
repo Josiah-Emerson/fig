@@ -8,6 +8,8 @@
 
 /*
  * Provides useful types and associated functions with vectors. This is meant in the Linear Algebra sense of the word, and not in the std::Vector sense
+ * TODO: Look into handling math better (both more optimized and ensuring we don't lose data)
+ * TODO: For functions: normalize() with type int should we error out? Unless the vector is a unit vector already it will likely return the vector { 0, 0, 0 }
  */
 
 namespace Core{
@@ -62,7 +64,7 @@ namespace Core{
             requires(Concepts::numeric<U>)
             Vector<std::common_type_t<T, U>, N> operator-(Vector<U, N> rhs) const;
 
-            // accessor
+            // accessors
             T& operator[](std::size_t i);
             const T& operator[](std::size_t i) const;
 
@@ -71,10 +73,11 @@ namespace Core{
             void normalize();
 
             // returns a vector of length 1 in the direction of this vector
-            Vector unitVector() const;
+            Vector<double, N> unitVector() const;
             
             // TODO: Funcs below are helpful for now when working on the class, but probably don't actually want it public or at all?
             void fill(T val);
+            T const * const data() const { return m_data; }
          private: 
             T m_data[N];
       };
@@ -105,7 +108,7 @@ namespace Core{
 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
-      std::ostream& operator<<(std::ostream& out, const Vector<T, N> v);
+      std::ostream& operator<<(std::ostream& out, const Vector<T, N>& v);
 
       // Non-member function so we can do scalar * vector not just vector * scalar
       template<typename T, typename U, std::size_t N>
@@ -168,7 +171,7 @@ namespace Core{
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
       template<typename... Args> requires(sizeof...(Args) <= N && (std::is_same_v<Args, T> && ...))
       Vector<T, N>::Vector(Args... args)
-         : Vector({ cast<T>(args)... })
+         : Vector({ static_cast<T>(args)... })
          { }
 
       /*
@@ -255,6 +258,9 @@ namespace Core{
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
       void Vector<T,N>::normalize(){
+         // TODO: For now just assert out if T is an int I guess? At some point would be nice to either 
+         // delete normalize() from Vector<int, N> but this might require some annoying inheritance hacking
+         assert((!std::is_same_v<T, int>) && "normalizing vector of type int will most likely result in an undesired vector. Try using unitVector() with a floating point type");
          double mag { magnitude() };
          for(std::size_t i { 0 }; i < N; ++i){
             m_data[i] /= mag;
@@ -263,8 +269,13 @@ namespace Core{
 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
-      Vector<T,N> Vector<T, N>::unitVector() const{
-         Vector<T, N> temp = *this;
+      Vector<double,N> Vector<T, N>::unitVector() const{
+         // TODO: is there a better way?
+         Vector<double, N> temp;
+         for(std::size_t i { 0 }; i < N; ++ i){
+            temp[i] = static_cast<double>((*this)[i]);
+         }
+
          temp.normalize();
          return temp;
       }
@@ -293,7 +304,7 @@ namespace Core{
       // output overload: 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
-      std::ostream& operator<<(std::ostream& out, const Vector<T, N> v){
+      std::ostream& operator<<(std::ostream& out, const Vector<T, N>& v){
          out << '(';
          for(std::size_t i { 0 }; i < N - 1; ++i){
             out << v[i] << ", ";

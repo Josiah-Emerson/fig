@@ -1,5 +1,6 @@
 #include "VectorTestLayer.h"
 #include "Core_Utils/Linear/Vector.h"
+#include "Core_Utils/Linear/Matrix.h"
 
 bool VectorTestLayer::onEvent(Core::Events::Event& event){
    if(event.type == Core::Events::Type::KEY_PRESS){
@@ -14,18 +15,10 @@ bool VectorTestLayer::onEvent(Core::Events::Event& event){
 
 void VectorTestLayer::output(){
    using namespace Core::Linear;
-   fvec3 vec1 { 30.4, 50.2, 92.43 };
-   std::cout << "Magnitude of vec 1 " << vec1 << ": " << vec1.magnitude() << '\n';
+   fvec3 vec1 { 0.0, 1.1, 2.2 };
+   fvec3 vec2 { 3.3, 4.4, 5.5 };
+   fvec3 vec3 { 6.6, 7.7, 8.8 };
 
-   dvec3 vec2 { 40.21837, 12.3124, 13.354 };
-   std::cout << "Magnitude of vec 2 " << vec2 << ": " << vec2.magnitude() << '\n';
-
-   auto vec3 = vec2 - vec1;
-   std::cout << "Vec3: " << vec3 << '\n';
-
-   double dotab = dotProduct(vec2, vec3);
-   double dotba = dotProduct(vec3, vec2);
-
-   std::cout << "vec2 dot vec3: " << dotab << '\n';
-   std::cout << "vec3 dot vec2: " << dotba << '\n';
+   Matrix<float, 3, 3> mat { vec1, vec2, vec3 };
+   std::cout << mat;
 }
