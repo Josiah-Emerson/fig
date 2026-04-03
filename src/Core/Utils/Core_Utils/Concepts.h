@@ -12,5 +12,12 @@ namespace Core{
                         !std::is_same_v<T, char> &&
                         !std::is_same_v<T, char const>;
 
+      // I guess not necessarily a concept but oh well
+      // shortcut for type promotion for example: float_promotion_t<int, int> returns float
+      // Useful for functions which can take two integral operands (but they don't have to be integral) 
+      // but will need to return floating point value to be useful
+      template<typename... Args>
+      using float_promotion_t = std::common_type_t<float, Args...>;
+
    } // namespace Concepts
 } // namespace Core

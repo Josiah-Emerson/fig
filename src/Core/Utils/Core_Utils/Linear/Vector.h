@@ -73,7 +73,7 @@ namespace Core{
             void normalize();
 
             // returns a vector of length 1 in the direction of this vector
-            Vector<double, N> unitVector() const;
+            Vector<Concepts::float_promotion_t<T>, N> unitVector() const;
             
             // TODO: Funcs below are helpful for now when working on the class, but probably don't actually want it public or at all?
             void fill(T val);
@@ -102,6 +102,7 @@ namespace Core{
 
       // returns the cross product of 2 3D vectors using the right hand rule
       // NOTE: Assumes i, j, and k are 1
+      // TODO: Should probably make use of Concepts::float_promotion_t
       template<typename T, typename U>
       requires(Concepts::numeric<T> && Concepts::numeric<U>)
       Vector<std::common_type_t<T, U>, 3> crossProduct(Vector<T, 3> a, Vector<U, 3> b);
@@ -117,7 +118,7 @@ namespace Core{
 
       template<typename T, typename U, std::size_t N>
       requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      double dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
+      std::common_type_t<T, U> dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
 
       /*
        *
@@ -171,7 +172,7 @@ namespace Core{
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
       template<typename... Args> requires(sizeof...(Args) <= N && (std::is_same_v<Args, T> && ...))
       Vector<T, N>::Vector(Args... args)
-         : Vector({ static_cast<T>(args)... })
+         : Vector({ static_cast<T>(args)... }) // TODO: static cast is redundant for now as we ensure Args is T, but perhaps for future?
          { }
 
       /*
@@ -261,6 +262,7 @@ namespace Core{
          // TODO: For now just assert out if T is an int I guess? At some point would be nice to either 
          // delete normalize() from Vector<int, N> but this might require some annoying inheritance hacking
          assert((!std::is_same_v<T, int>) && "normalizing vector of type int will most likely result in an undesired vector. Try using unitVector() with a floating point type");
+         assert((!std::is_floating_point_v<T>) && "vector type is not a floating point type, and normalization will likely result in undesired vector");
          double mag { magnitude() };
          for(std::size_t i { 0 }; i < N; ++i){
             m_data[i] /= mag;
@@ -269,11 +271,12 @@ namespace Core{
 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
-      Vector<double,N> Vector<T, N>::unitVector() const{
+      Vector<Concepts::float_promotion_t<T>, N> Vector<T, N>::unitVector() const{
          // TODO: is there a better way?
-         Vector<double, N> temp;
+         typedef Concepts::float_promotion_t<T> tp;
+         Vector<tp, N> temp;
          for(std::size_t i { 0 }; i < N; ++ i){
-            temp[i] = static_cast<double>((*this)[i]);
+            temp[i] = static_cast<tp>((*this)[i]);
          }
 
          temp.normalize();
@@ -323,9 +326,9 @@ namespace Core{
 
       template<typename T, typename U, std::size_t N>
       requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      double dotProduct(const Vector<T, N>& a, const Vector<U, N>& b){
+      std::common_type_t<T, U> dotProduct(const Vector<T, N>& a, const Vector<U, N>& b){
          auto vec = a * b;
-         double res { 0 };
+         std::common_type_t<T, U> res { 0 };
          for(std::size_t i { 0 }; i < N; ++i){
             res += vec[i];
          }
