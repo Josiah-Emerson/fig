@@ -3,8 +3,10 @@
 #include "Core_Utils/Linear/Vector.h"
 #include <cstddef>
 #include <cstring>
+#include <cassert>
 #include <initializer_list>
 #include <iostream>
+#include <stdexcept>
 #include <type_traits>
 
 /*
@@ -26,6 +28,10 @@
 
 namespace Core{
    namespace Linear{
+
+      // Forward declarations
+      template<typename T, std::size_t N> requires(Concepts::numeric<T>)
+      class Vector;
 
       // Creates an M x N matrix of type T where M is is the N is the number of rows and N is the number of columns, and T is numeric
       template<typename T, std::size_t M, std::size_t N>
@@ -55,10 +61,25 @@ namespace Core{
             Matrix& operator=(Matrix&& m) = default;
             ~Matrix() = default;
 
+            // TODO: As with most of these I am not sure of their efficiency
+            Matrix(const Vector<T, M>& vec) requires(N == 1);
+
             // Matrix Multiplication
             template<typename U, std::size_t R, std::size_t C>
             requires(Concepts::numeric<U> && N == R)
             Matrix<std::common_type_t<T, U>, M, C> operator*(const Matrix<U, R, C>& rhs) const;
+
+            // Mat * Vector
+            template<typename U>
+            requires(Concepts::numeric<U>)
+            Vector<std::common_type_t<T, U>, M> operator*(const Vector<U, M>& vec){
+               // TODO: For now use our Vector constructor from matrix of size M x 1 ?
+               /* 
+               auto res = ((*this) * static_cast<Matrix<U, M, 1>>(vec));
+               return res.col(0);
+               */ 
+               return (*this) * static_cast<Matrix<U, M, 1>>(vec); 
+            }
 
             // (row, col) access to elements (0-indexed)
             T& at(const std::size_t row, const std::size_t col);
@@ -75,6 +96,19 @@ namespace Core{
          private:
             T m_data[M * N];
       };
+
+      /*
+       *
+       * COMMON MATRIX TYPEDEFS
+       *
+       */
+
+      typedef Matrix<int, 3, 3> imat3;
+      typedef Matrix<int, 4, 4> imat4;
+      typedef Matrix<float, 3, 3> fmat3;
+      typedef Matrix<float, 4, 4> fmat4;
+      typedef Matrix<double, 3, 3> dmat3;
+      typedef Matrix<double, 4, 4> dmat4;
 
       /*
        *
@@ -135,6 +169,14 @@ namespace Core{
       Matrix<T, M, N>::Matrix(Args... args)
       : Matrix({ args... })
       { }
+
+      template<typename T, std::size_t M, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Matrix<T, M, N>::Matrix(const Vector<T, M>& vec) requires(N == 1) {
+         for(std::size_t i { 0 }; i < M; ++i){
+            m_data[i] = vec[i];
+         }
+      }
 
       /*
        *

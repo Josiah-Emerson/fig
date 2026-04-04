@@ -1,18 +1,18 @@
 set(dir "Utils")
 set(target "Core_${dir}")
 message(STATUS "${target} module")
-add_library(${target} INTERFACE)
+add_library(${target})
 add_library("Core::${dir}" ALIAS ${target})
 
 # SOURCES
 target_sources(${target} PRIVATE
-   # ${target}/Linear/Vector.cpp
+   ${target}/Linear/MatrixTransform.cpp
 )
 
 # INCLUDE DIRECTORY
-target_include_directories(${target} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${target} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # LINK TO LIBRARIES
-target_link_libraries(${target} INTERFACE
+target_link_libraries(${target} PRIVATE
    # Core
 )

@@ -6,11 +6,18 @@ namespace Core{
 
       // NOTE: Numeric to me means numbers and not things such as char or bools
       // NOTE: for type T which std::is_arithmetic_v returns true for, it will return false for T* and T& meaning this concept resstricts T to not being a pointer or a reference
+      /*
       template<typename T>
       concept numeric = std::is_arithmetic_v<T> &&
                         !std::is_same_v<T, bool> &&
                         !std::is_same_v<T, char> &&
                         !std::is_same_v<T, char const>;
+                        */
+      template<typename... Args>
+      concept numeric = (std::is_arithmetic_v<Args> && ...) &&
+                        (!std::is_same_v<Args, bool> && ...) &&
+                        (!std::is_same_v<Args, char> && ...) &&
+                        (!std::is_same_v<Args, char const> && ...);
 
       // I guess not necessarily a concept but oh well
       // shortcut for type promotion for example: float_promotion_t<int, int> returns float

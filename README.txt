@@ -1,3 +1,6 @@
+TODO: Projection matrix is ever so slightly off of what glm::perspective returns. Specifically in the first element and 6th i.e. second row second column
+TODO: Think about some cool ways to overload vector/matrix funcs to allow for some more useful and different stuff
+TODO: Look into how to handle (for just in vec/mat stuff but in the future more heavy calculations) things like loss of precision, when should a small number just become 0, etc..
 TODO: Work on openGL renderer
 TODO: Implement a Fig enum for datatypes and have imgui handle translating so that layers don't need to know about ImGuiDataType
 TODO: Implement Tree and refactor stuff to use that

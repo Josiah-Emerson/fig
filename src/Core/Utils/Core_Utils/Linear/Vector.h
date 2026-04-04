@@ -1,7 +1,9 @@
 #pragma once
 #include "Core_Utils/Concepts.h"
+#include "Core_Utils/Linear/Matrix.h"
 #include <cassert>
 #include <cmath>
+#include <concepts>
 #include <initializer_list>
 #include <ostream>
 #include <type_traits>
@@ -14,6 +16,9 @@
 
 namespace Core{
    namespace Linear{
+      // Forward declarations
+      template<typename T, std::size_t M, std::size_t N> requires(Concepts::numeric<T>)
+      class Matrix;
 
       // Creates an N x 1 column vector of type T, where T is numeric (treated as column for now because we like matrix vector multiplation) 
       template<typename T, std::size_t N>
@@ -40,29 +45,40 @@ namespace Core{
             Vector(Args... args);
 
             // TODO: Big 5 if needed
+            template<typename U>
+            requires(std::convertible_to<U, T>)
+            Vector(const Vector<U, N>& v)
+             : Vector()
+            {
+               for(std::size_t i { 0 }; i < N; ++i)
+                  m_data[i] = v[i];
+            }
+
             Vector(const Vector& v) = default; // copy constructor
             Vector(Vector&& v) = default; // move constructor
             Vector& operator=(const Vector& v) = default; // copy assignment
             Vector& operator=(Vector&& v)= default; // move assignment
             ~Vector() = default;
 
+            Vector(const Matrix<T, N, 1>& mat);
+
             // Operators
-            template<typename U>
+            template<typename U, typename V = std::common_type_t<T, U>>
             requires(Concepts::numeric<U>)
-            Vector<std::common_type_t<T, U>, N> operator*(U scalar) const;
+            Vector<V, N> operator*(U scalar) const;
 
             // element-wise multiplation
-            template<typename U>
+            template<typename U, typename V = std::common_type_t<T, U>>
             requires(Concepts::numeric<U>)
-            Vector<std::common_type_t<T, U>, N> operator*(Vector<U, N> rhs) const;
+            Vector<V, N> operator*(Vector<U, N> rhs) const;
 
-            template<typename U>
+            template<typename U, typename V = std::common_type_t<T, U>>
             requires(Concepts::numeric<U>)
-            Vector<std::common_type_t<T, U>, N> operator+(Vector<U, N> rhs) const;
+            Vector<V, N> operator+(Vector<U, N> rhs) const;
 
-            template<typename U>
+            template<typename U, typename V = std::common_type_t<T, U>>
             requires(Concepts::numeric<U>)
-            Vector<std::common_type_t<T, U>, N> operator-(Vector<U, N> rhs) const;
+            Vector<V, N> operator-(Vector<U, N> rhs) const;
 
             // accessors
             T& operator[](std::size_t i);
@@ -81,6 +97,9 @@ namespace Core{
          private: 
             T m_data[N];
       };
+      // Deduction guide
+      template<typename... Args> requires(Concepts::numeric<Args> && ...)
+      Vector(Args...) -> Vector<std::common_type_t<Args...>, sizeof...(Args)>;
 
       /*
        *
@@ -100,25 +119,26 @@ namespace Core{
        *
        */
 
+      // TODO: could add a bool for right handedness and/or a vector which defines i j and k
+      // Both could be default unless supplied
       // returns the cross product of 2 3D vectors using the right hand rule
       // NOTE: Assumes i, j, and k are 1
-      // TODO: Should probably make use of Concepts::float_promotion_t
-      template<typename T, typename U>
-      requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, 3> crossProduct(Vector<T, 3> a, Vector<U, 3> b);
+      template<typename T, typename U, typename V = Concepts::float_promotion_t<T, U>>
+      requires(Concepts::numeric<T, U>)
+      Vector<V, 3> crossProduct(const Vector<T, 3>& a, const Vector<U, 3>& b);
 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
       std::ostream& operator<<(std::ostream& out, const Vector<T, N>& v);
 
       // Non-member function so we can do scalar * vector not just vector * scalar
-      template<typename T, typename U, std::size_t N>
-      requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> operator*(U scalar, const Vector<T, N>& vector);
+      template<typename T, typename U, std::size_t N, typename V = std::common_type_t<T, U>>
+      requires(Concepts::numeric<T, U>)
+      Vector<V, N> operator*(U scalar, const Vector<T, N>& vector);
 
-      template<typename T, typename U, std::size_t N>
-      requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      std::common_type_t<T, U> dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
+      template<typename T, typename U, std::size_t N, typename retType = std::common_type_t<T,U>>
+      requires(Concepts::numeric<T, U>)
+      retType dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
 
       /*
        *
@@ -175,46 +195,59 @@ namespace Core{
          : Vector({ static_cast<T>(args)... }) // TODO: static cast is redundant for now as we ensure Args is T, but perhaps for future?
          { }
 
+
+      template<typename T, std::size_t N>
+      requires(Concepts::numeric<T>)
+      Vector<T, N>::Vector(const Matrix<T, N, 1>& mat) {
+         for(std::size_t i { 0 }; i < N; ++i){
+            m_data[i] = mat.at(i, 0);
+         }
+      }
+
       /*
        *
        * OPERATORS
        *
        */
 
+      // NOTE: V is a default arg 
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
-      template<typename U> requires(Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator*(U scalar) const{
-         Vector<std::common_type_t<T, U>, N> res;
+      template<typename U, typename V> requires(Concepts::numeric<U>)
+      Vector<V, N> Vector<T, N>::operator*(U scalar) const{
+         Vector<V, N> res;
          for(std::size_t i { 0 }; i < N; ++i)
             res[i] = scalar * m_data[i];
 
          return res;
       }
 
+      // NOTE: V is a default arg 
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
-      template<typename U> requires(Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator*(Vector<U, N> rhs) const{
-         Vector<std::common_type_t<T, U>, N> temp;
+      template<typename U, typename V> requires(Concepts::numeric<U>)
+      Vector<V, N> Vector<T, N>::operator*(Vector<U, N> rhs) const{
+         Vector<V, N> temp;
          for(std::size_t i { 0 }; i < N; ++i)
             temp[i] = (*this)[i] * rhs[i];
 
          return temp;
       }
 
+      // NOTE: V is a default arg 
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
-      template<typename U> requires(Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator+(Vector<U, N> rhs) const{
-         Vector<std::common_type_t<T, U>, N> res;
+      template<typename U, typename V> requires(Concepts::numeric<U>)
+      Vector<V, N> Vector<T, N>::operator+(Vector<U, N> rhs) const{
+         Vector<V, N> res;
          for(std::size_t i { 0 }; i < N; ++i)
             res[i] = (*this)[i] + rhs[i];
 
          return res;
       }
 
+      // NOTE: V is a default arg 
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
-      template<typename U> requires(Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> Vector<T, N>::operator-(Vector<U, N> rhs) const{
-         Vector<std::common_type_t<T, U>, N> res;
+      template<typename U, typename V> requires(Concepts::numeric<U>)
+      Vector<V, N> Vector<T, N>::operator-(Vector<U, N> rhs) const{
+         Vector<V, N> res;
          for(std::size_t i { 0 }; i < N; ++i)
             res[i] = (*this)[i] - rhs[i];
 
@@ -262,7 +295,7 @@ namespace Core{
          // TODO: For now just assert out if T is an int I guess? At some point would be nice to either 
          // delete normalize() from Vector<int, N> but this might require some annoying inheritance hacking
          assert((!std::is_same_v<T, int>) && "normalizing vector of type int will most likely result in an undesired vector. Try using unitVector() with a floating point type");
-         assert((!std::is_floating_point_v<T>) && "vector type is not a floating point type, and normalization will likely result in undesired vector");
+         assert((std::is_floating_point_v<T>) && "vector type is not a floating point type, and normalization will likely result in undesired vector");
          double mag { magnitude() };
          for(std::size_t i { 0 }; i < N; ++i){
             m_data[i] /= mag;
@@ -273,10 +306,10 @@ namespace Core{
       requires(Concepts::numeric<T>)
       Vector<Concepts::float_promotion_t<T>, N> Vector<T, N>::unitVector() const{
          // TODO: is there a better way?
-         typedef Concepts::float_promotion_t<T> tp;
-         Vector<tp, N> temp;
+         typedef Concepts::float_promotion_t<T> Tp;
+         Vector<Tp, N> temp;
          for(std::size_t i { 0 }; i < N; ++ i){
-            temp[i] = static_cast<tp>((*this)[i]);
+            temp[i] = static_cast<Tp>((*this)[i]);
          }
 
          temp.normalize();
@@ -304,6 +337,21 @@ namespace Core{
        * FREE VECTOR METHODS
        *
        */
+
+      // NOTE: type V is a default arg
+      template<typename T, typename U, typename V>
+      requires(Concepts::numeric<T, U>)
+      Vector<V,  3> crossProduct(const Vector<T, 3>& a, const Vector<U, 3>& b){
+         // TODO: General, but check for precision loss!! (At least in debug mode if not in release)
+
+         // NOTE: Maybe refactor to use a determinant function of matrix ?
+         // Although this function doesn't need to be general since we can only really do it for 3D
+         // Also may be slower
+         return { static_cast<V>(  (a[1] * b[2]) - (a[2] * b[1]) ), 
+                  static_cast<V>( -(a[0] * b[2]) + (a[2] * b[0]) ),
+                  static_cast<V>(  (a[0] * b[1]) - (a[1] * b[0]) )};
+      }
+         
       // output overload: 
       template<typename T, std::size_t N>
       requires(Concepts::numeric<T>)
@@ -317,18 +365,20 @@ namespace Core{
          return out;
       }
       
+      // NOTE: V is a default arg
       // Non-member function so we can do scalar * vector not just vector * scalar
-      template<typename T, typename U, std::size_t N>
-      requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      Vector<std::common_type_t<T, U>, N> operator*(U scalar, const Vector<T, N>& vector){
+      template<typename T, typename U, std::size_t N, typename V>
+      requires(Concepts::numeric<T, U>)
+      Vector<V, N> operator*(U scalar, const Vector<T, N>& vector){
          return vector * scalar;
       }
 
-      template<typename T, typename U, std::size_t N>
-      requires(Concepts::numeric<T> && Concepts::numeric<U>)
-      std::common_type_t<T, U> dotProduct(const Vector<T, N>& a, const Vector<U, N>& b){
+      // NOTE: retType is a default arg
+      template<typename T, typename U, std::size_t N, typename retType>
+      requires(Concepts::numeric<T, U>)
+      retType dotProduct(const Vector<T, N>& a, const Vector<U, N>& b){
          auto vec = a * b;
-         std::common_type_t<T, U> res { 0 };
+         retType res { 0 };
          for(std::size_t i { 0 }; i < N; ++i){
             res += vec[i];
          }

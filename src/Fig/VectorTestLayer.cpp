@@ -1,4 +1,5 @@
 #include "VectorTestLayer.h"
+#include "Core_Utils/Linear/MatrixTransform.h"
 #include "Core_Utils/Linear/Vector.h"
 #include "Core_Utils/Linear/Matrix.h"
 #include <iomanip>
@@ -16,7 +17,21 @@ bool VectorTestLayer::onEvent(Core::Events::Event& event){
 
 void VectorTestLayer::output(){
    using namespace Core::Linear;
-   // 4x3 3x3
+
+   // MVP
+   auto M = modelMatrix( Vector{0, 0 , 0}, Vector{1 ,1 ,1});
+   auto V = viewMatrix(Vector(4, 3, 3), Vector(0, 0, 0), Vector(0, 1, 0));
+   auto P = projectionMatrix(16.f/9.f, 80, 0.1f, 100.f);
+
+   auto MV = V * M;
+   auto MVP = P * MV;
+   std::cout << M;
+   std::cout << V;
+   std::cout << P;
+   std::cout << MVP;
+   fvec4 o(1);
+   std::cout << o << '\n';
+   std::cout << MVP * o << '\n';
 
    /* 
    std::cout << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
@@ -38,5 +53,5 @@ void VectorTestLayer::output(){
    auto res = mat1 * mat2;
    std::cout << "mat1 * mat2 = " << res;
    */
-   // THIS EXAMPLE AS A FLOAT LOSES PRECISION
+   // THIS EXAMPLE AS A FLOAT LOSES PRECISION (Notice they are currently double)
 }
