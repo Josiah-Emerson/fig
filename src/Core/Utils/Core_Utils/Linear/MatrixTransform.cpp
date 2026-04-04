@@ -14,7 +14,7 @@ namespace Core{
          // TODO: simple optimizations like if it speeds up to construct in place? Or calculate near - far once ?
          FOV = degToRad(FOV);
 
-         const float T = std::atan(FOV/2) * near;
+         const float T = std::tan(FOV/2) * near;
          const float R = AR * T;
 
          Matrix<float, 4, 4> res;
