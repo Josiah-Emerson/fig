@@ -1,8 +1,6 @@
 #include "VectorTestLayer.h"
-#include "Core_Utils/Linear/MatrixTransform.h"
-#include "Core_Utils/Linear/Vector.h"
-#include "Core_Utils/Linear/Matrix.h"
-#include <iomanip>
+#include "Core_Graphics/gl/GLRenderDevice.h"
+#include <memory>
 
 bool VectorTestLayer::onEvent(Core::Events::Event& event){
    if(event.type == Core::Events::Type::KEY_PRESS){
@@ -16,22 +14,8 @@ bool VectorTestLayer::onEvent(Core::Events::Event& event){
 
 
 void VectorTestLayer::output(){
-   using namespace Core::Linear;
-
-   // MVP
-   auto M = modelMatrix( Vector{0, 0 , 0}, Vector{1 ,1 ,1});
-   auto V = viewMatrix(Vector(4, 3, 3), Vector(0, 0, 0), Vector(0, 1, 0));
-   auto P = projectionMatrix(16.f/9.f, 80, 0.1f, 100.f);
-
-   auto MV = V * M;
-   auto MVP = P * MV;
-   std::cout << M;
-   std::cout << V;
-   std::cout << P;
-   std::cout << MVP;
-   fvec4 o(1);
-   std::cout << o << '\n';
-   std::cout << MVP * o << '\n';
+   std::unique_ptr<Core::RenderDevice> rd = std::make_unique<Core::GLRenderDevice>();
+   rd->registerDrawable();
 
    /* 
    std::cout << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);

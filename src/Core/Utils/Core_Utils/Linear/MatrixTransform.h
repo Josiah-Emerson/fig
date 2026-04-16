@@ -125,11 +125,11 @@ namespace Core{
          khat.normalize();
 
          // ihat
-         Vector<Mat, 3> ihat { crossProduct(khat, up) };
+         Vector<Mat, 3> ihat { crossProduct(up, khat) };
          ihat.normalize();
 
          // jhat
-         Vector<Mat, 3> jhat { crossProduct(ihat, khat ) };
+         Vector<Mat, 3> jhat { crossProduct(khat, ihat ) };
 
          auto R = getIdentityMatrix<Mat, 4>();
          auto T = getIdentityMatrix<Mat, 4>();

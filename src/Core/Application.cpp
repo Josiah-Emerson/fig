@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <ranges>
 
 namespace Core{
 
@@ -41,9 +42,15 @@ namespace Core{
             layer->onUpdate();
          }
 
+         // We should render in reverse? So that way the more 'background' layers are drawn first, and don't draw over more foreground?
+         for(const std::unique_ptr<Layer>& layer : m_layerStack | std::views::reverse){
+            layer->onRender();
+         }
+         /*
          for(const std::unique_ptr<Layer>& layer: m_layerStack){
             layer->onRender();
          }
+         */
 
          m_window->update();
       }

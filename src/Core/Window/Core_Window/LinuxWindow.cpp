@@ -149,7 +149,7 @@ namespace Core{
    }
 
    void LinuxWindow::newImGuiFrame(){
-      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplOpenGL3_NewFrame(); // TODO: Coupled here to openGL for ImGui, but this should be easy enough to change when we add other support?
       ImGui_ImplX11_NewFrame();
       ImGui::NewFrame();
    }

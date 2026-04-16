@@ -26,5 +26,9 @@ namespace Core{
       template<typename... Args>
       using float_promotion_t = std::common_type_t<float, Args...>;
 
+
+      template<typename T>
+      concept is_component = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
+
    } // namespace Concepts
 } // namespace Core
