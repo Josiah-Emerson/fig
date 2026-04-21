@@ -17,9 +17,10 @@ target_sources(${project} PRIVATE
 # LINK MODULES FROM CORE
 target_link_libraries(${project} PRIVATE 
    Core
-   Core::ImGui
+   Core::ECS
    Core::Graphics
-   Core::Utils # TODO: take this out when done testing if we don't need this
+   Core::ImGui
+   Core::Utils
 )
 
 # TODO: When include dirs

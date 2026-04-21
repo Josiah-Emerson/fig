@@ -1,6 +1,6 @@
 #include "VectorTestLayer.h"
-#include "Core_Graphics/gl/GLRenderDevice.h"
-#include <memory>
+#include <iostream>
+#include <random>
 
 bool VectorTestLayer::onEvent(Core::Events::Event& event){
    if(event.type == Core::Events::Type::KEY_PRESS){
@@ -11,31 +11,44 @@ bool VectorTestLayer::onEvent(Core::Events::Event& event){
    return false;
 }
 
+VectorTestLayer::VectorTestLayer()
+   : m_registry { }
+{
+   constexpr int NUM_ENTITIES { 1000 };
+   std::cout << "In Vector Test Layer constructor, after Registry construction\n";
+   std::cout << "Inserting " << NUM_ENTITIES << " entities into registry\n";
+   std::random_device rd;
+   std::mt19937 gen(rd());
+   std::uniform_int_distribution<> dist(-10000, 10000);
 
+   Core::EntityID id;
+   for(int i { 0 }; i < NUM_ENTITIES; ++i ){
+      id = m_registry.registerEntity();
+      m_registry.addComponent<PositionComponent>(id, {{dist(gen), dist(gen), dist(gen)}} );
+   }
+
+   std::cout << "Done adding elements\n";
+}
+
+
+std::ostream& operator<<(std::ostream& out, const PositionComponent& pos){
+   out << pos.pos;
+   return out;
+}
+template<typename T>
+void print(const Core::ComponentPool<T>& pool){
+   for(std::size_t i { 0 }; i < pool.size(); ++i){
+      std::cout << "Element at position " << i << ": ";
+      std::cout << pool[i] << '\n';
+   }
+}
 
 void VectorTestLayer::output(){
-   std::unique_ptr<Core::RenderDevice> rd = std::make_unique<Core::GLRenderDevice>();
-   rd->registerDrawable();
-
-   /* 
-   std::cout << std::fixed << std::setprecision(std::numeric_limits<double>::max_digits10);
-   dvec3 vec1 {3929.31038, 9804.72841, 5063.86373};
-   dvec3 vec2 {6935.28254, 7699.60976, 3030.65272};
-   dvec3 vec3 {6051.64732, 3844.55456, 6890.15868};
-   dvec3 vec4 {1741.83093, 7555.56280, 3415.21740};
-
-   dvec3 vec5 {9059.37915, 2793.78649, 3076.63488};
-   dvec3 vec6 {3307.81531, 1392.47996, 6361.62214};
-   dvec3 vec7 {5227.21071, 1810.54073, 7185.46577};
-   // 6488.09236, 1666.50859,  588.44051
-
-   Matrix<double, 4, 3> mat1 { vec1, vec2, vec3, vec4 };
-   Matrix<double, 3, 3> mat2 { vec5, vec6, vec7 };
-   std::cout << "mat1: " << mat1;
-   std::cout << "mat2: " << mat2;
-
-   auto res = mat1 * mat2;
-   std::cout << "mat1 * mat2 = " << res;
-   */
-   // THIS EXAMPLE AS A FLOAT LOSES PRECISION (Notice they are currently double)
+   print(m_registry.getPool<PositionComponent>());
+   std::cout << "Mult each by 2\n";
+   Core::ComponentPool<PositionComponent>& pool = m_registry.getPool<PositionComponent>();
+   for(std::size_t i { 0 }; i < pool.size(); ++i){
+      pool[i].pos = pool[i].pos * 2;
+   }
+   print(m_registry.getPool<PositionComponent>());
 }

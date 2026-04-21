@@ -6,6 +6,7 @@
 #include <tuple>
 #include <unordered_set>
 
+// TODO: Update functions to not just take an r val (i.e. addComponent(id, T&&) and (id, T&))
 // TODO: If we are constantly checking whether a pool contains an ID or not, we might be best to have a bitset for that?
 
 namespace Core{
@@ -124,19 +125,10 @@ namespace Core{
       : m_pools {}  // TODO: Does this default construct the std::vectors themselves? Read up on std:::tuple constructors
    {
       internalReserve(numEntities);
-
       // TODO: Look into if reasoning is correct, (and if the init list above works as well), but 
       // here we reserve numEntities for each of the vectors for performance reasons, which allows no realloc 
       // later if numEntities guess is correct. Also, default initializing all of these elements in the vectors instead of reserving 
       // might zero out all the memory which could take time? Especially because we don't (or at least shouldn't) care about that 
-      constexpr std::size_t NUM_COMPONENTS = std::tuple_size_v<std::tuple<Components...>>;
-      // TODO: If we ever in the future need to keep a list of what types m_pools contains, 
-      // then perhaps update this for loop (and others) to use that list to explicitly do something 
-      // like ComponentPool<Component>& pool = std::get<i>(m_pools); instead of auto& 
-      for(std::size_t i { 0 }; i < NUM_COMPONENTS; ++i){
-         auto& pool = std::get<i>(m_pools);
-         pool.reserve(numEntities);
-      }
    }
 
    template<typename... Components> requires(Concepts::is_component<Components> && ...)
@@ -251,13 +243,13 @@ bool addComponents(EntityID id, Args&&... args) {
    template<typename... Components> requires(Concepts::is_component<Components> && ...)
    template<typename T> requires(Concepts::is_in_pack<T, Components...>)
    ComponentPool<T>& Registry<Components...>::getPool(){
-      return std::get<T>(m_pools);
+      return std::get<ComponentPool<T>>(m_pools);
    }
 
    template<typename... Components> requires(Concepts::is_component<Components> && ...)
    template<typename T> requires(Concepts::is_in_pack<T, Components...>)
    const ComponentPool<T>& Registry<Components...>::getPool() const{
-      return std::get<T>(m_pools);
+      return std::get<ComponentPool<T>>(m_pools);
    }
 
    template<typename... Components> requires(Concepts::is_component<Components> && ...)

@@ -28,7 +28,7 @@ namespace Core{
 
 
       template<typename T>
-      concept is_component = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
+      concept is_component = std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>;
 
       // Is type U in (expanded) pack V
       // Proper syntax: is_in_pack<U, Pack...>

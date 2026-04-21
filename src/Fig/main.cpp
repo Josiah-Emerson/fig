@@ -11,7 +11,9 @@ int main(){
 
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
+   std::cout << "Pushing VectorTestLayer\n";
    app.pushLayer<VectorTestLayer>();
+   std::cout << "Finished pushing VectorTestLayer\n";
    app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }

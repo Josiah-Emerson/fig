@@ -26,7 +26,7 @@ namespace Core{
       class Vector{
          public: 
 
-            // Creates a vector of size N with all elements intialized to 0
+            // Creates a vector of size N with all elements uninitialized
             Vector();
 
             // Creates a vector of size N with all elements initialized to val
