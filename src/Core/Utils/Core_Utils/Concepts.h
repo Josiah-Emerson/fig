@@ -30,5 +30,18 @@ namespace Core{
       template<typename T>
       concept is_component = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
 
+      // Is type U in (expanded) pack V
+      // Proper syntax: is_in_pack<U, Pack...>
+      template<typename U, typename... V>
+      concept is_in_pack = (std::is_same_v<U, V> || ...);
+
+      // NOTE: This is from gemini, and while it is O(N^2) at compile time (where N is a type) this should hopefully not be an issue 
+      // if the number of types checked and times used is not so large
+      template<typename T, typename... Pack>
+      inline constexpr std::size_t type_count = (std::is_same_v<T, Pack> + ...); // TODO: suspicious addition here. Is this guaranteed behavior?
+
+      template<typename... Args>
+      concept all_types_unique = ( (type_count<Args, Args...> == 1) && ... );
+
    } // namespace Concepts
 } // namespace Core
