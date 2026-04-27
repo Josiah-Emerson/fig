@@ -1,3 +1,5 @@
+TODO: Add testing capabilities for different classes
+
 TODO: Implementing GLShaderProgram. Make it so that it can take a GLShader shared pointer as an argument (probalby a virtual func) to attach. 
 Add to destructor of GLShader to delete it to free memory. In GLShaderProgram, detach GLShader in destructor from each shared pointers. Do linking stuff
 

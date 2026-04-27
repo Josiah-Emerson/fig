@@ -6,9 +6,22 @@
 #include <vector>
 
 namespace Core{
-   // To be defined by the graphics specific implementation
-   enum ShaderDataType : int;
-   struct ShaderInputVariableInfo;
+   // Data types that must be supported in some way by a graphics implementation
+   // Adding on to this list will require updating all existing graphics implementations
+   enum ShaderDataType{ 
+      INT,
+      FLOAT,
+      DOUBLE,
+      F_VEC3,
+      F_MAT4,
+      UNKNOWN,
+   };
+
+   struct ShaderInputVariableInfo{
+      ShaderDataType type;
+      std::string name;
+      std::size_t numElements; // usually 1, but if it is an array of things it might be more
+   };
 
 
    class ShaderProgram{
@@ -52,7 +65,7 @@ namespace Core{
 
          // get list of shaders
          const std::vector<std::shared_ptr<Shader>>& getAttachedShadersList() const { return m_shaders; }
-         std::vector<std::shared_ptr<Shader>> getAttachedShadersList() { return m_shaders; }
+         std::vector<std::shared_ptr<Shader>>& getAttachedShadersList() { return m_shaders; }
 
          // links all added shaders together
          virtual bool link() = 0;
@@ -66,9 +79,9 @@ namespace Core{
 
          // TODO: Do we need these?
          // Returns a list of ShaderInputVariableInfo structs which are graphics implementation specific and represent necessary info for Uniform variables
-         virtual std::vector<ShaderInputVariableInfo> getUniformVariables() const = 0;
+         virtual const std::vector<ShaderInputVariableInfo>& getUniformVariables() const = 0;
          // Returns a list of ShaderInputVariableInfo structs which are graphics implementation specific and represent necessary info for per-vertex variables
-         virtual std::vector<ShaderInputVariableInfo> getAttributeVariables() const = 0;
+         virtual const std::vector<ShaderInputVariableInfo>& getAttributeVariables() const = 0;
 
          // TODO: possibly change attribute
          virtual bool setUniform(std::string_view name, void* value, ShaderDataType type) = 0;

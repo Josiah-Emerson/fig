@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "OverlayLayer.h"
 #include "UncaughtEventsOutputLayer.h"
-#include "VectorTestLayer.h"
+#include "TestLayer.h"
 
 int main(){
    Core::ApplicationSpec appSpec;
@@ -11,9 +11,7 @@ int main(){
 
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
-   std::cout << "Pushing VectorTestLayer\n";
-   app.pushLayer<VectorTestLayer>();
-   std::cout << "Finished pushing VectorTestLayer\n";
+   app.pushLayer<TestLayer>();
    app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }

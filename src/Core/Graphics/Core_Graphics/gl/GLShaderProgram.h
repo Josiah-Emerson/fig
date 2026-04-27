@@ -5,16 +5,6 @@
 #include <GL/glext.h>
 
 namespace Core{
-   // OpenGL input types we have support for
-   enum ShaderDataType : int{
-   };
-
-   struct ShaderInputVariableInfo{
-      std::size_t size; // size of the input variable (NOTE: This is 1 for all non-array types for OpenGL)
-      ShaderDataType type; // data type of input variable
-      std::string name; // name of input variable
-   };
-
    class GLShaderProgram : public ShaderProgram{
       public:
          GLShaderProgram(OpenGL& openGL);
@@ -31,15 +21,25 @@ namespace Core{
 
          std::string getInfoLog() const override;
 
-         std::vector<ShaderInputVariableInfo> getUniformVariables() const override;
-         std::vector<ShaderInputVariableInfo> getAttributeVariables() const override;
+         // TODO: Actually implement the following 4 funcs
+         const std::vector<ShaderInputVariableInfo>& getUniformVariables() const override { return m_uniformVariables; }
+         const std::vector<ShaderInputVariableInfo>& getAttributeVariables() const override { return m_attributeVariables; }
 
          bool setUniform(std::string_view name, void* value, ShaderDataType type) override;
-         bool setAttribute(std::string_view name, void* value, ShaderDataType type) override;
+         bool setAttribute(std::string_view name, void* value, ShaderDataType type) override { return false;}
+
+      private: 
+         void populateVariableVectors();
+         ShaderDataType shaderDataTypeFromGLenum(const GLenum type) const;
+         GLenum glenumFromShaderDataType(const ShaderDataType type) const;
 
       private:
          OpenGL& m_openGL;
-         GLuint m_ID;
+         GLuint m_ID; 
+         // NOTE: for vectors below, the index of an input variable in openGL should (?) match its index in the vector since that is how it is populated
+         // TODO/NOTE: This is possibly only true for shaders which specify layout = x or whatever. Should probably have a better way of doing that so that it is always correct
+         std::vector<ShaderInputVariableInfo> m_attributeVariables; 
+         std::vector<ShaderInputVariableInfo> m_uniformVariables;
    };
 } // namespace Core
 

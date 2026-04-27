@@ -4,8 +4,11 @@
 // TODO: Add a way for ShaderPrograms to be notified about a change in subShader compilations. Call back?
 
 namespace Core{
-   // Types to be defined by specific implementations
-   enum ShaderType : int;
+   enum ShaderType : int{
+      VERTEX_SHADER,
+      FRAGMENT_SHADER,
+      COMPUTE_SHADER,
+   };
 
    // Represents an agnostic compiled shader
    class Shader{

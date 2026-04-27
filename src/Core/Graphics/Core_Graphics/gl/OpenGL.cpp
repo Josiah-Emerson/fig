@@ -11,11 +11,19 @@
 namespace Core{
    OpenGL::OpenGL(Core::Window& window){
       FETCH_GL_FUNC(PFNGLATTACHSHADERPROC, glAttachShader);
+      FETCH_GL_FUNC(PFNGLBINDBUFFERPROC, glBindBuffer);
+      FETCH_GL_FUNC(PFNGLBINDVERTEXARRAYPROC, glBindVertexArray);
+      FETCH_GL_FUNC(PFNGLBUFFERDATAPROC, glBufferData);
       FETCH_GL_FUNC(PFNGLCOMPILESHADERPROC, glCompileShader);
       FETCH_GL_FUNC(PFNGLCREATEPROGRAMPROC, glCreateProgram);
       FETCH_GL_FUNC(PFNGLCREATESHADERPROC, glCreateShader);
       FETCH_GL_FUNC(PFNGLDELETEPROGRAMPROC, glDeleteProgram);
       FETCH_GL_FUNC(PFNGLDELETESHADERPROC,  glDeleteShader);
+      FETCH_GL_FUNC(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray);
+      FETCH_GL_FUNC(PFNGLGENBUFFERSPROC, glGenBuffers);
+      FETCH_GL_FUNC(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays);
+      FETCH_GL_FUNC(PFNGLGETACTIVEATTRIBPROC, glGetActiveAttrib);
+      FETCH_GL_FUNC(PFNGLGETACTIVEUNIFORMPROC, glGetActiveUniform);
       FETCH_GL_FUNC(PFNGLGETATTACHEDSHADERSPROC, glGetAttachedShaders);
       FETCH_GL_FUNC(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog);
       FETCH_GL_FUNC(PFNGLGETPROGRAMIVPROC, glGetProgramiv);
@@ -26,5 +34,11 @@ namespace Core{
       FETCH_GL_FUNC(PFNGLSHADERSOURCEPROC, glShaderSource);
       FETCH_GL_FUNC(PFNGLUSEPROGRAMPROC, glUseProgram);
       FETCH_GL_FUNC(PFNGLVALIDATEPROGRAMPROC, glValidateProgram);
+      FETCH_GL_FUNC(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer);
    }
+
+   bool OpenGL::operator==(const OpenGL& other) const{
+      return this == &other;
+   }
+
 } // namespace Core

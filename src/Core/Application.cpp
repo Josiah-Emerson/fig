@@ -33,7 +33,7 @@ namespace Core{
          // }
 
          // NOTE: update and render are separated for a couple reasons:
-         // 1) if rendering is done on separate thread and we need to make sure we render after layer is updated
+         // 1) if rendering is done on separate thread and we need to make sure we render after layer is updated (does this even make sense?)
          // 2) if things from one layer will depend on updates from other layers before rendering
          // TODO: if none of the first 2 are true, could profile to see how much quicker it is doing updates and render at same time
          // TODO: if 2 is true, and it is sufficiently quicker to update and render at same time,

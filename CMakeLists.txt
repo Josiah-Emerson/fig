@@ -14,6 +14,11 @@ message("Runtime dir: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 
 # TODO: if need to add compile options for future (for example allow user to decide to use X11 or wayland) see erhe cmakelists root file for set_options macro
 
+# TODO: For now we only support openGL but add support for other version. Also, for now this is compile time, but should we allow it to be a runtime feature?
+set(FIG_TARGET_GRAPHICS_OPENGL TRUE)
+add_definitions(-DOPENGL)
+message("OpenGL set as target graphics platform")
+
 # NOTE: If we add another platform ensure that ${CMAKE_SYSTEM_NAME} is wrapped in "" or else the MATCHES or STREQUAL will not run as expected
 if(WIN32) 
    message("Detected Windows platform")

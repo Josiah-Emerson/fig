@@ -2,29 +2,27 @@
 #include "Application.h"
 #include "Core_Graphics/gl/OpenGL.h"
 #include "Core_Graphics/RenderDevice.h"
+#include <utility>
 
 namespace Core{
    class GLRenderDevice : public RenderDevice {
       public: 
          GLRenderDevice()
             : m_openGL(*Application::get().getWindow())
+            , m_modelVAOList {}
          { 
             std::cout << "New GL Render Device created\n";
          }
-         void registerDrawable() override { 
-            const GLubyte* ptr;
-            ptr = m_openGL.glGetString(GL_VENDOR);
-            std::cout << "The Vendor is: " << ptr << '\n';
 
-            ptr = m_openGL.glGetString(GL_RENDERER);
-            std::cout << "The Renderer is: " << ptr << '\n';
+         bool registerModel(const Model& model) override;
+         bool registerEntity(EntityID id, const Model& model, std::shared_ptr<ShaderProgram> shaderProgram) override;
 
-            ptr = m_openGL.glGetString(GL_VERSION);
-            std::cout << "The GL Version is: " << ptr << '\n';
-         }
+         std::shared_ptr<Shader> createShader(const char* filepath, ShaderType type) override;
+         std::shared_ptr<ShaderProgram> createShaderProgram() override;
+         void drawRegisteredEntities() override { }
 
-         void unregisterDrawable() override { }
       private: 
          OpenGL m_openGL;
+         std::vector<std::pair<const Model&, GLuint>> m_modelVAOList; // List of Model VAO object pairs
    };
 } // namespace Core

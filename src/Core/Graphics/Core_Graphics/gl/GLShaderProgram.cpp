@@ -11,6 +11,8 @@ namespace Core{
       : ShaderProgram()
       , m_ID { 0 } // if ID is 0, openGL will silently ignore all (i think) requests related to this ID
       , m_openGL(openGL)
+      , m_attributeVariables {}
+      , m_uniformVariables {}
    { }
 
    GLShaderProgram::~GLShaderProgram(){
@@ -96,6 +98,8 @@ namespace Core{
       }
 
       setState(LINKED);
+      populateVariableVectors();
+
       return true;
    }
 
@@ -136,6 +140,69 @@ namespace Core{
       delete[] log;
 
       return ret;
+   }
+
+
+   void GLShaderProgram::populateVariableVectors() {
+      GLint numActive, maxNameLength, charsWritten, size;
+      GLenum type;
+
+      // Attribute Vars
+      m_openGL.glGetProgramiv(m_ID, GL_ACTIVE_ATTRIBUTES, &numActive);
+      m_openGL.glGetProgramiv(m_ID, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
+
+      m_attributeVariables.reserve(numActive);
+      GLchar* name = new GLchar[maxNameLength];
+
+      for(GLuint i { 0 }; i < numActive; ++i){
+         m_openGL.glGetActiveAttrib(m_ID, i, maxNameLength, &charsWritten, &size, &type, name);
+         m_attributeVariables.emplace_back(shaderDataTypeFromGLenum(type),
+                                       std::move(std::string(name, charsWritten)), 
+                                       size);
+      }
+      delete[] name;
+
+      // Uniform vars
+      m_openGL.glGetProgramiv(m_ID, GL_ACTIVE_UNIFORMS, &numActive);
+      m_openGL.glGetProgramiv(m_ID, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxNameLength);
+
+      m_uniformVariables.reserve(numActive);
+      name = new GLchar[maxNameLength];
+      for(GLuint i { 0 }; i < numActive; ++i){
+         m_openGL.glGetActiveUniform(m_ID, i, maxNameLength, &charsWritten, &size, &type, name);
+         m_uniformVariables.emplace_back(shaderDataTypeFromGLenum(type), 
+                                          std::move(std::string(name, charsWritten)), 
+                                          size);
+      }
+
+      delete[] name;
+   }
+
+   ShaderDataType GLShaderProgram::shaderDataTypeFromGLenum(const GLenum type) const{
+      switch(type){
+         case(GL_INT): return INT;
+         case(GL_FLOAT): return FLOAT;
+         case(GL_DOUBLE): return DOUBLE;
+         case(GL_FLOAT_VEC3): return F_VEC3;
+         case(GL_FLOAT_MAT4): return F_MAT4;
+         default: return UNKNOWN;
+      }
+   }
+
+   GLenum GLShaderProgram::glenumFromShaderDataType(const ShaderDataType type) const{
+      switch(type){
+         case(INT): return GL_INT;
+         case(FLOAT): return GL_FLOAT;
+         case(DOUBLE): return GL_DOUBLE;
+         case(F_VEC3): return GL_FLOAT_VEC3;
+         case(F_MAT4): return GL_FLOAT_MAT4;
+         case(UNKNOWN): assert(false && "Not sure what GLenum to return from UNKNOWN ShaderDataType."); // TODO: probably don't actually want to assert, but fine for now
+         default: assert(false && "Wow we have an undhandled ShaderDataType!!\n");
+      }
+   }
+
+   bool GLShaderProgram::setUniform(std::string_view name, void* value, ShaderDataType type){
+      return false;
    }
 
 } // namespace Core

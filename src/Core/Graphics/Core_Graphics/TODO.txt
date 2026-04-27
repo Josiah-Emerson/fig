@@ -1,3 +1,7 @@
+NOTE: For openGL we go by the following convention for shaders: 
+layout(location = 0) vertex position data (model coordinates) : fvec3
+layout(location = 1) vertex color data : fvec3
+
 For now just go with openGL. No point in keeping things abstract since idek what other graphics pipelines look like, and nor do I care at the moment
 
 Renderer: Has data such as VAOs and VBOs ( look into if we need to define these sepately for openGL specific impl )

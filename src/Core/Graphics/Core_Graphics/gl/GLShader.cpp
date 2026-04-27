@@ -2,6 +2,7 @@
 #include "Core_Graphics/Shader.h"
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
 namespace Core{
    GLShader::GLShader(const char* filepath, ShaderType type, OpenGL& openGL)
@@ -15,7 +16,7 @@ namespace Core{
    }
 
    bool GLShader::compile(){
-      m_ID = m_openGL.glCreateShader(getShaderType());
+      m_ID = m_openGL.glCreateShader(getGLShaderType());
       std::string shaderCode;
       std::ifstream shaderStream(m_filepath, std::ios::in);
       if(!shaderStream.is_open()){
@@ -57,6 +58,9 @@ namespace Core{
    bool reload() { return false; }
 
    std::string GLShader::getLogInfo() const {
+      // TODO: See GLShaderProgram's getLogInfo func, but we probably shouldn't be doing this logic here, but rather just returning what OpenGL's log has for us 
+      // Something else should do the logic of what the status is based on m_stage
+
       switch(m_stage){
          case(NO_COMPILATION_ATTEMPTED):
             {
@@ -99,6 +103,27 @@ namespace Core{
       char* message = new char[infoLogLength + 1];
       m_openGL.glGetShaderInfoLog(m_ID, infoLogLength, NULL, message);
       return message;
+   }
+
+   bool GLShader::operator==(const Shader& other) const{
+      if(const GLShader* otherGL = dynamic_cast<const GLShader*>(&other)){
+         return ( (m_openGL == otherGL->m_openGL) && (m_ID == otherGL->m_ID) );
+      }
+
+      return false;
+   }
+
+   GLenum GLShader::getGLShaderType() const{
+      switch(getShaderType()){
+         case(VERTEX_SHADER):
+            return GL_VERTEX_SHADER;
+         case(FRAGMENT_SHADER): 
+            return GL_FRAGMENT_SHADER;
+         case(COMPUTE_SHADER):
+            return GL_COMPUTE_SHADER;
+         default: 
+            throw std::runtime_error("ShaderType not yet handled in GLShader class");
+      }
    }
 
 } // namespace Core

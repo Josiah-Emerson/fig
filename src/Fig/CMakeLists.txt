@@ -8,10 +8,10 @@ add_executable(${project})
 
 # TARGET SOURCES
 target_sources(${project} PRIVATE
-   main.cpp
    OverlayLayer.cpp
+   TestLayer.cpp
    UncaughtEventsOutputLayer.cpp
-   VectorTestLayer.cpp
+   main.cpp
 )
 
 # LINK MODULES FROM CORE
