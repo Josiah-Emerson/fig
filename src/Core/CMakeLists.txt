@@ -14,6 +14,10 @@ add_subdirectory(Utils)
 add_subdirectory(Window)
 
 target_link_libraries(${target} PUBLIC 
+   Core::ECS
+   Core::Graphics
+   Core::ImGui
+   Core::Utils
    Core::Window
 )
 

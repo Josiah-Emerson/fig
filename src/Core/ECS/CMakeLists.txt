@@ -1,7 +1,7 @@
 set(dir "ECS")
 set(target "Core_${dir}")
 message(STATUS "${target} module")
-add_library(${target} )
+add_library(${target} STATIC)
 add_library("Core::${dir}" ALIAS ${target})
 
 # SOURCES

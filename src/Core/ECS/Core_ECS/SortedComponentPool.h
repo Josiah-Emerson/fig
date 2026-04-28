@@ -5,6 +5,7 @@
 #include <cassert>
 #include <concepts>
 #include <map>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -43,12 +44,15 @@ namespace Core{
          void remove(const EntityID id);
          bool contains(const EntityID id) const;
          std::size_t size() const;
+         std::size_t capacity() const;
          void reserve(std::size_t newCapacity);
          bool updateComponent(const EntityID, const Component& val);
-         // NOTE: returns after doing nothing if entity is not in this component
+         // NOTE: returns false if entity is not in pool
+         // returns true if updated or entity already has a comperand which is the same as the newComperand
          bool updateComperand(const EntityID, const U& newComperand);
 
          // returns element at position i from 0 to size()
+         // NOTE: throws if not in bounds, so if you want to be efficient but dangerous used contiguousdata()
          Component& operator[](std::size_t i);
          const Component& operator[](std::size_t i) const;
 
@@ -91,7 +95,7 @@ namespace Core{
 
          // TODO: Added this functionality for a reason, but nowhwere calls it and I am not sure why? 
          // Perhaps for future remove?
-         U& getComperandFromID(const EntityID id);
+         U getComperandFromID(const EntityID id);
    };
 
    /*
@@ -247,6 +251,11 @@ namespace Core{
    }
 
    CLASS_TEMPLATE
+   std::size_t SortedComponentPool<Component, Compare, U>::capacity() const{
+      return m_data.capacity();
+   }
+
+   CLASS_TEMPLATE
    void SortedComponentPool<Component, Compare, U>::reserve(std::size_t newCapacity){
       if(newCapacity <= m_data.capacity())
          return;
@@ -268,6 +277,9 @@ namespace Core{
       if(!contains(id))
          return false;
 
+      if(newComperand == getComperandFromID(id))
+         return true;
+
       // TODO: possibly more efficent way but this works for now
       Component data = this->id(id);
       remove(id);
@@ -277,21 +289,31 @@ namespace Core{
 
    CLASS_TEMPLATE
    Component& SortedComponentPool<Component, Compare, U>::operator[](std::size_t i){
+      if(i > (m_data.size() - 1))
+         throw std::out_of_range("out of range in operator[] for SortedComponentPool");
       return m_data[i];
    }
 
    CLASS_TEMPLATE
    const Component& SortedComponentPool<Component, Compare, U>::operator[](std::size_t i) const {
+      if(i > (m_data.size() - 1))
+         throw std::out_of_range("out of range in operator[] for SortedComponentPool");
       return m_data[i];
    }
 
    CLASS_TEMPLATE
    Component& SortedComponentPool<Component, Compare, U>::id(const EntityID id){
+      if(!contains(id))
+         throw std::out_of_range("out of range for func id() in SortedComponentPool");
+
       return m_data[indexFromID(id)];
    }
 
    CLASS_TEMPLATE
    const Component& SortedComponentPool<Component, Compare, U>::id(const EntityID id) const{
+      if(!contains(id))
+         throw std::out_of_range("out of range for func id() in SortedComponentPool");
+
       return m_data[indexFromID(id)];
    }
 
@@ -316,6 +338,8 @@ namespace Core{
             [idx](std::pair<const EntityID, std::size_t> v){
                return idx == v.second;
             });
+      if(search == m_idToIndexMap.end())
+         throw std::out_of_range("Index out of range for idFromIndex() function in SortedComponentPool");
 
       return search->first;
    }
@@ -350,10 +374,27 @@ namespace Core{
 
    CLASS_TEMPLATE 
    void SortedComponentPool<Component, Compare, U>::incrementInvalidIndices(const std::size_t firstInvalidIndex){
-      for(std::size_t i { firstInvalidIndex }; i < m_data.size(); ++i){
-         auto iter = m_idToIndexMap.find(idFromIndex(i));
-         ++(iter->second);
+      // NOTE: We need to do new map because otherwise we can get ourselves in a situation where 
+      // we increment the same IDs index instead of the correct one
+      // EX: {(id, index)} -> {(0, 0), (1, 1), (2, 2)} would do: 
+      // findIDfromidx(0) -> 0, and update id that ID: {(0, 1), (1, 1), (2, 2)}
+      // then findIDfromidx(1) -> 0, and update that ID: {(0, 2), (1, 1), (2, 2)}
+      // and so on...
+
+      std::unordered_map<EntityID, std::size_t> m_newMap;
+      m_newMap.reserve(m_idToIndexMap.size());
+
+      for(std::size_t i { 0 }; i < firstInvalidIndex; ++i){
+         EntityID id = idFromIndex(i);
+         m_newMap.insert({id, i});
       }
+
+      for(std::size_t i {firstInvalidIndex }; i < m_data.size(); ++i){
+         EntityID id = idFromIndex(i);
+         m_newMap.insert({id, i + 1});
+      }
+
+      m_idToIndexMap = std::move(m_newMap);
    }
 
    CLASS_TEMPLATE
@@ -366,18 +407,28 @@ namespace Core{
 
    CLASS_TEMPLATE
    void SortedComponentPool<Component, Compare, U>::decrementInvalidIndices(const std::size_t firstInvalidIndex){
-      for(std::size_t i { firstInvalidIndex }; i < m_data.size(); ++i){
-         auto iter = m_idToIndexMap.find(idFromIndex(i));
-         --(iter->second);
+      std::unordered_map<EntityID, std::size_t> m_newMap;
+      m_newMap.reserve(m_idToIndexMap.size());
+
+      for(std::size_t i { 0 }; i < firstInvalidIndex; ++i){
+         EntityID id = idFromIndex(i);
+         m_newMap.insert({id, i});
       }
+
+      for(std::size_t i {firstInvalidIndex }; i < m_data.size(); ++i){
+         EntityID id = idFromIndex(i);
+         m_newMap.insert({id, i - 1});
+      }
+
+      m_idToIndexMap = std::move(m_newMap);
    }
 
    CLASS_TEMPLATE
-   U& SortedComponentPool<Component, Compare, U>::getComperandFromID(const EntityID id){
+   U SortedComponentPool<Component, Compare, U>::getComperandFromID(const EntityID id){
       std::size_t idx = indexFromID(id);
       auto search = std::find_if(m_separatorList.begin(), m_separatorList.end(),
-               [id](std::pair<const U, Separator> v){
-                  return (id >= v->second.first) && (id <= v->second.second);
+               [idx](std::pair<const U, Separator> v){
+                  return (idx >= v.second.first) && (idx <= v.second.second);
                });
 
       return search->first;

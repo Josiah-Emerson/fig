@@ -36,11 +36,22 @@ else()
    message(FATAL_ERROR "OS not supported ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSYTEM_PROCESSOR}")
 endif()
 
+if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+   message("Debug build detected")
+   # TODO: Actual debug stuff
+endif()
+
 # ImGui
 # TODO: Should this be defined here? It needs to be targeted in the next cmakelists file anyways?
 include_directories(${CMAKE_SOURCE_DIR}/imgui)
 file(GLOB_RECURSE imgui_files "imgui/*.cpp")
 
 add_subdirectory(src)
+
+if(TESTS)
+   message("Test build requested")
+   add_subdirectory(${CMAKE_SOURCE_DIR}/Catch2)
+   add_subdirectory(test)
+endif()
 
 # cmake -DCMAKE_BUILD_TYPE=Debug
