@@ -5,6 +5,10 @@ namespace Core{
       return bool(bits & flag);
    }
 
+   bool ShaderProgram::isValid() const {
+      return (m_state.stage == LINKED) && (!m_state.status);
+   }
+
    // NOTE: fail is a default arg
    void ShaderProgram::setState(ShaderProgramStage newStage, StageFailFlags fail) { 
       m_state.stage = newStage;

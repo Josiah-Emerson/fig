@@ -202,7 +202,13 @@ namespace Core{
    }
 
    bool GLShaderProgram::setUniform(std::string_view name, void* value, ShaderDataType type){
-      return false;
+      if(type != F_MAT4)
+         return false;
+      // TODO: NOT GOOD VERY DANGEROUS BUT OH WELL
+      float* mat4 = (float*)value;
+      GLint matID = m_openGL.glGetUniformLocation(m_ID, "MVP");
+      m_openGL.glUniformMatrix4fv(matID, 1, GL_FALSE, mat4);
+      return true;
    }
 
 } // namespace Core

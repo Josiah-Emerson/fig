@@ -3,10 +3,12 @@
 #include "Core_Utils/Concepts.h"
 #include "Core_Utils/Types.h"
 #include "SortedComponentPool.h"
+#include <functional>
 #include <stdexcept>
 #include <tuple>
 #include <unordered_map>
 
+// TODO: With addition of m_comperandValidatorFunc, we just throw an error if an invalid comperand is passed. Is this the best way?
 // NOTE/TODO: calling addComponents/updateComponents (And maybe others) checks if an entity, 
 // and then calls the individual add/update function, which also checks if that entity exists. This means 
 // that a single addComponents call for 5 components on an entity checks if the ID exists 6 different times
@@ -29,6 +31,11 @@
 // }
 
 namespace Core{
+   // THOUGHT: SortedRegistry should be a central repository for keeping track of all the different 
+   // components a scene might want. For example position, color, velocity and mass. A RenderDevice 
+   // may only need access to position and color data for rendering, in which case layer/scene passes 
+   // it a const reference to the component pool within the registry and it can do stuff off of that
+   // pass a function pointer from RenderDevice to ensure that ShaderProgram and Model are both registered
 
 #define CLASS_TEMPLATE template<typename U, typename Compare, typename... Components> \
    requires((Concepts::is_component<Components> && ...) && \
@@ -38,6 +45,9 @@ namespace Core{
    class SortedRegistry{
       public: 
          SortedRegistry(std::size_t numEntities = 1000);
+
+         // If only certain comperands are valid, passing a comperandValidatorFunc allows for injecting the behavior you need into it
+         SortedRegistry(std::function<bool(const U&)> comperandValidatorFunc, std::size_t numEntities = 1000);
 
          SortedRegistry(const SortedRegistry& other) = default;
          SortedRegistry(SortedRegistry&& other) = default;
@@ -52,6 +62,8 @@ namespace Core{
          template<typename... Args> requires((Concepts::is_in_pack<Args, Components...> && ...) &&
                                              (Concepts::all_types_unique<Args...>))
          EntityID registerNewEntity(const U& comperand, Args&&... args);
+
+         void setComperandValidatorFunction(std::function<bool(const U&)> func);
 
          bool containsEntity(const EntityID) const;
 
@@ -115,6 +127,7 @@ namespace Core{
          // getting going from U to all EntityIDs with that U will be quite slow. If we do this often may be good 
          // to implement a Bimap
          std::unordered_map<EntityID, U> m_entitiesToComperandMap; // Maps each entity ID to its comperand 
+         std::function<bool(const U&)> m_comperandValidatorFunc = [](const U&){ return true; };
    };
 
    /*
@@ -137,12 +150,23 @@ namespace Core{
    }
 
    CLASS_TEMPLATE
+   SortedRegistry<U, Compare, Components...>::SortedRegistry(std::function<bool(const U&)> comperandValidatorFunc, std::size_t numEntities)
+      : SortedRegistry {numEntities}
+   {
+      m_comperandValidatorFunc = std::move(comperandValidatorFunc);
+   }
+
+   CLASS_TEMPLATE
    EntityID SortedRegistry<U, Compare, Components...>::registerNewEntity(const U& comperand){
+      if(!m_comperandValidatorFunc(comperand)){
+         throw std::runtime_error("Comperand passed to registerNewEntity() in SortedRegistry fails the comperand validator check");
+      }
+
       static EntityID id { 0 };
       while(containsEntity(id))
          ++id;
 
-      m_entitiesToComperandMap.insert(id, comperand);
+      m_entitiesToComperandMap.insert({id, comperand});
 
       return id++;
    }
@@ -151,6 +175,9 @@ namespace Core{
    template<typename... Args> requires((Concepts::is_in_pack<Args, Components...> && ...) && 
                                        (Concepts::all_types_unique<Args...>))
    EntityID SortedRegistry<U, Compare, Components...>::registerNewEntity(const U& comperand, Args&&... args){
+      if(!m_comperandValidatorFunc(comperand)){
+         throw std::runtime_error("Comperand passed to registerNewEntity() in SortedRegistry fails the comperand validator check");
+      }
       EntityID id = registerNewEntity(comperand);
 
       if((!addComponent(id, std::forward<Args>(args)) && ...)){
@@ -158,6 +185,14 @@ namespace Core{
       }
 
       return id;
+   }
+
+   CLASS_TEMPLATE
+   void SortedRegistry<U, Compare, Components...>::setComperandValidatorFunction(std::function<bool(const U&)> func){
+      // TODO: what happens if there are already elements in registry ? 
+      // Should we not allow a set if it contains any elements? 
+      // Should we check all elements to ensure their comperands are fine?
+      m_comperandValidatorFunc = std::move(func);
    }
 
    CLASS_TEMPLATE
@@ -187,7 +222,7 @@ namespace Core{
       if(!containsEntity(id))
          return false;
 
-      SortedComponentPool<T, Compare, U>& pool = getPool<T, Compare, U>();
+      SortedComponentPool<T, Compare, U>& pool = getPool<T>();
       return pool.insert(id, component, getComperand(id));
    }
 
@@ -213,6 +248,10 @@ namespace Core{
 
    CLASS_TEMPLATE
    void SortedRegistry<U, Compare, Components...>::updateComperand(const EntityID id, const U& comperand){
+      if(!m_comperandValidatorFunc(comperand)){
+         throw std::runtime_error("Comperand passed to updateComperand() in SortedRegistry fails the comperand validator check");
+      }
+
       if(!containsEntity(id))
          return;
 

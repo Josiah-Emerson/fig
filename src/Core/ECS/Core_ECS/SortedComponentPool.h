@@ -20,7 +20,9 @@
 namespace Core{
 #define CLASS_TEMPLATE template<typename Component, typename Compare, typename U> \
    requires(Concepts::is_component<Component> &&  \
-            std::strict_weak_order<Compare, U, U>) \
+            std::strict_weak_order<Compare, U, U> && \
+            Concepts::is_equality_comparable<U>)
+            
 
    // An underlying contiguous store of Entity IDs to Components
    // Sorted by function Compare on type U (which is Component if otherwise specified)

@@ -7,6 +7,7 @@ add_library("Core::${dir}" ALIAS ${target})
 # SOURCES
 target_sources(${target} PRIVATE
    ${target}/Camera.cpp
+   ${target}/Model.cpp
    ${target}/RenderDevice.cpp
    ${target}/ShaderProgram.cpp
    ${target}/tempGLDevice.cpp

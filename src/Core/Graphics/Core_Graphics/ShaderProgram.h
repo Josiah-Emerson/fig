@@ -89,6 +89,12 @@ namespace Core{
 
          bool isFailBitSet(const StageFailFlags bits, StageFailFlags_ flag) const;
 
+         // For now if it is linked and no failbits are set but likely to changed based on some things
+         // pulled into its own function so that if multiple areas need to know if it is 'valid' and our def 
+         // of valid changes we only have to change this.
+         bool isValid() const;
+
+
       protected:
          void setState(ShaderProgramStage newStage, StageFailFlags fail = NONE);
 

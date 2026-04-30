@@ -1,4 +1,5 @@
 #pragma once
+#include "Core_ECS/SortedRegistry.h"
 #include "Layer.h"
 #include <array>
 #include <memory>
@@ -14,8 +15,12 @@ class TestLayer : public Core::Layer {
 
    private: 
       using ShaderList = std::array<std::shared_ptr<Core::Shader>, 2>;
+      using Registry = Core::SortedRegistry<Core::GraphicsComperand, Core::GraphicsCompare, 
+                                            Core::PositionComponent>;
+
 
       std::shared_ptr<Core::RenderDevice> m_renderDevice;
       ShaderList m_shaders;
       std::shared_ptr<Core::ShaderProgram> m_shaderProgram;
-};
+      Registry m_registry;
+   };

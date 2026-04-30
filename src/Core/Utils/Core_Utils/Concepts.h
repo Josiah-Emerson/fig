@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 #include <type_traits>
 
 namespace Core{
@@ -42,6 +43,12 @@ namespace Core{
 
       template<typename... Args>
       concept all_types_unique = ( (type_count<Args, Args...> == 1) && ... );
+
+      // checks if type two operands (a and b) of type T can do a == b
+      template<typename T>
+      concept is_equality_comparable = requires(T a, T b) {
+         {a == b} -> std::convertible_to<bool>;
+      };
 
    } // namespace Concepts
 } // namespace Core

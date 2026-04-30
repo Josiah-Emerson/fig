@@ -6,7 +6,6 @@
 #include <cassert>
 #include <initializer_list>
 #include <iostream>
-#include <stdexcept>
 #include <type_traits>
 
 /*
@@ -33,7 +32,7 @@ namespace Core{
       template<typename T, std::size_t N> requires(Concepts::numeric<T>)
       class Vector;
 
-      // Creates an M x N matrix of type T where M is is the N is the number of rows and N is the number of columns, and T is numeric
+      // Creates an M x N matrix of type T where M is the number of rows and N is the number of columns, and T is numeric
       template<typename T, std::size_t M, std::size_t N>
       requires(Concepts::numeric<T>)
       class Matrix{
@@ -80,6 +79,10 @@ namespace Core{
                */ 
                return (*this) * static_cast<Matrix<U, M, 1>>(vec); 
             }
+
+            // Transpose
+            Matrix<T, N, M> transpose() const;
+
 
             // (row, col) access to elements (0-indexed)
             T& at(const std::size_t row, const std::size_t col);
@@ -205,6 +208,23 @@ namespace Core{
        * MEMBER METHODS
        * 
        */
+
+      template<typename T, std::size_t M, std::size_t N> 
+      requires(Concepts::numeric<T>)
+      Matrix<T, N, M> Matrix<T, M, N>::transpose() const{
+         // swap rows and cols
+         // m row vectors of length n
+         // get each col in a vector and use those as row vector 
+         // TODO: can probably be more efficient with less copies
+         Matrix<T, N, M> ret {};
+         for(std::size_t newRow { 0 }; newRow < N; ++newRow){
+            for(std::size_t newCol { 0 }; newCol < N; ++newCol){
+               ret.at(newRow, newCol) = this->at(newCol, newRow);
+            }
+         }
+
+         return ret;
+      }
 
       template<typename T, std::size_t M, std::size_t N>
       requires(Concepts::numeric<T>)
