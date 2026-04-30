@@ -7,6 +7,8 @@
 
 namespace Core{
    bool GLRenderDevice::registerModel(Model& model){
+      // TODO: identify fail points
+
       GLuint VAO;
       m_openGL.glGenVertexArrays(1, &VAO);
       m_openGL.glBindVertexArray(VAO);
@@ -77,6 +79,8 @@ namespace Core{
       std::shared_ptr<ShaderProgram> currBoundProgram { nullptr };
       std::shared_ptr<Model> currBoundModel { nullptr };
 
+      // TODO: depending on final form, look at hoisting out commonly looked at vars 
+      // into a local var for better cache
       for(const auto& it : iterators){
          const GraphicsComperand& gComp = it.first;
          const auto& separator = it.second;
@@ -99,11 +103,21 @@ namespace Core{
             currBoundModel = gComp.model;
          }
 
-         // <= cuz separator is [lower, upper] inclusive
+         //                     [first, second]
+         // <= cuz separator is [lower, upper ] inclusive
          for(std::size_t i { separator.first }; i <= separator.second; ++i){
             // build MVP matrix here
             // MVP = P * V * M
             auto val = m_positionPool[i];
+
+            // Example: 1 ShaderProgram has MVP uniform and one has MVP and COLOR uniform
+            // MVP is mat4 in both and COLOR is vec3. How do we go about so that it knows 
+            // which one, and how to use it 
+            // an entity using program 1 would have an entry in position pool which could be used to calculate
+            // MVP, while an entity using program 2 would have that AND an entry in colorPool 
+            // with its color value
+            // in this case every shaderProgram would have an associated set of pools with the 
+            // data it needs and how to transform that data? 
 
             auto M = Linear::modelMatrix(val, Linear::Vector{1, 1, 1});
             auto MVP = P * V * M;

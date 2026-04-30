@@ -83,8 +83,9 @@ namespace Core{
          // Returns a list of ShaderInputVariableInfo structs which are graphics implementation specific and represent necessary info for per-vertex variables
          virtual const std::vector<ShaderInputVariableInfo>& getAttributeVariables() const = 0;
 
-         // TODO: possibly change attribute
          virtual bool setUniform(std::string_view name, void* value, ShaderDataType type) = 0;
+         // TODO: Currently all of our attributes are handles by binding a VAO which matches the layout specified 
+         // in Core/Graphics/TODO.txt and so there is not really a reason to use setAttribute() currently
          virtual bool setAttribute(std::string_view name, void* value, ShaderDataType type) = 0;
 
          bool isFailBitSet(const StageFailFlags bits, StageFailFlags_ flag) const;
