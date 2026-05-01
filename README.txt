@@ -54,3 +54,10 @@ The average MSD after 10000 iterations for 1000 time steps is: 4.373e-05
 The average MSD after 10000 iterations for 5000 time steps is: 4.3849e-05
 The average MSD after 10000 iterations for 10000 time steps is: 4.39099e-05
 The average MSD after 10000 iterations for 50000 time steps is: 4.46298e-05
+
+DEV DEPENDENCIES: 
+- If working on linux: 
+   - Need 'libx11-dev' for x11 headers, BUT should just use 'xorg-dev' if doing OpenGL as well as 
+   'xorg-dev' provides glx bindings
+- For testing, need to clone Catch2 locally (at least until I figure out the submodule)
+   - Catch2 is ignored for now in .gitignore
