@@ -43,8 +43,8 @@ namespace Core{
 
 #define CLASS_TEMPLATE template<typename U, typename Compare, typename... Components> \
    requires((Concepts::is_component<Components> && ...) && \
+   (Concepts::all_types_unique<Components...>) && \
    std::strict_weak_order<Compare, U, U>)
-   //(Concepts::all_types_unique<Components...>) && \
    
    CLASS_TEMPLATE
    class SortedRegistry{
@@ -189,7 +189,11 @@ namespace Core{
       }
       EntityID id = registerNewEntity(comperand);
 
-      if((!addComponent(id, std::forward<Args>(args)) && ...)){
+      // TODO: Note in this case the ! must come outside of the inner () 
+      // otherwise the folding works incorrectly. Firstly what changes 
+      // when it goes inside that causes it to work incorrectly (i.e. it somehow passes this if but only adds the fist component)
+      // And secondly if there are other places which use this forwarding logic make sure it is correct
+      if(!(addComponent(id, std::forward<Args>(args)) && ...)){
          throw std::runtime_error("Error in registering new entity with components. One of the ComponentPools failed to add a component\n");
       }
 

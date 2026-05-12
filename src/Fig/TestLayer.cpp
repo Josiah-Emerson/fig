@@ -163,14 +163,17 @@ TestLayer::TestLayer()
          [&cam = this->m_camera](void* data, ArgType arg, std::size_t offset){
             using namespace Core;
 
-            const PositionComponent* position = std::get<GraphicsComponentIndex::POSITION>(arg);
-            const ScaleComponent* scale = std::get<GraphicsComponentIndex::SCALE>(arg);
+            const PositionComponent* position = std::get<const PositionComponent*>(arg);
+            const ScaleComponent* scale = std::get<const ScaleComponent*>(arg);
+
             assert(position && "Position component is nullptr");
             assert(scale && "Scale component is nullptr");
 
             auto V = cam.viewMatrix();
             auto P = cam.projectionMatrix();
-            auto M = Linear::modelMatrix(position[offset], scale[offset]);
+            auto M = Linear::modelMatrix(
+                  static_cast<PositionComponent::Type>(position[offset]), 
+                  static_cast<ScaleComponent::Type>(scale[offset]));
             auto MVP = P * V * M;
             memcpy(data, &MVP, sizeof(MVP));
          });
@@ -180,9 +183,11 @@ TestLayer::TestLayer()
    m_renderDevice->registerModel(rainbowModel);
    Core::GraphicsComperand comp {m_shaderProgram, std::make_shared<Core::Model>(cubeModel)};
 
-   m_registry.registerNewEntity(comp, Core::PositionComponent{0, 0, 0});
+   m_registry.registerNewEntity(comp, Core::PositionComponent{{0, 0, 0}},
+                                      Core::ScaleComponent{{1, 1, 1}});
    m_registry.registerNewEntity(Core::GraphicsComperand{m_shaderProgram, std::make_shared<Core::Model>(rainbowModel)}, 
-                                Core::PositionComponent{-2, 2, -4.5});
+                                Core::PositionComponent{{-2, 2, -4.5}},
+                                Core::ScaleComponent{{1, 1, 1}});
 }
 
 

@@ -11,30 +11,37 @@ namespace Core{
 
 
    // Define components here and add below 
+   struct PositionTag {};
+   struct DirectionTag {};
+   struct ScaleTag {};
+   struct ColorTag {};
 
-   struct PositionComponent{using type = Linear::fvec3;}
-   using PositionComponent = Linear::fvec3;
-   using DirectionComponent = Linear::fvec3;
-   using ScaleComponent = Linear::fvec3;
-   using ColorComponent = Linear::fvec3;
+   template<typename T, typename Tag>
+   struct Component{
+      using Type = T;
+      T val;
+
+      // references 
+      operator T&() { return val; }
+      operator const T&() const { return val; }
+
+      // pointers 
+      operator T*() { return &val; }
+      operator const T*() const { return &val; }
+   };
+
+   using PositionComponent = Component<Linear::fvec3, PositionTag>;
+   using DirectionComponent = Component<Linear::fvec3, DirectionTag>;
+   using ScaleComponent = Component<Linear::fvec3, ScaleTag>;
+   using ColorComponent = Component<Linear::fvec3, ColorTag>;
 
    template<typename... Components>
    struct ComponentPack {};
 
    using GraphicsComponentList = ComponentPack<PositionComponent,
-                                       DirectionComponent,
-                                       ScaleComponent,
-                                       ColorComponent>; // Add components to list here
-   enum GraphicsComponentIndex : std::size_t { // NOTE: KEEP THIS ORDER THE SAME AS THE LIST ORDER
-                                               // NOTE: If this order changes or an element is added, 
-                                               // need to grep around and update areas of code which rely on 
-                                               // this ordering. Very fragile
-      POSITION = 0,
-      DIRECTION,
-      SCALE,
-      COLOR,
-      NUM_COMPONENTS
-   };
+                                               DirectionComponent,
+                                               ScaleComponent,
+                                               ColorComponent>; // Add components to list here
 
    template<typename U, typename Compare, typename Pack>
    struct CreateGraphicsRegistry;
@@ -48,9 +55,9 @@ namespace Core{
    template<typename Pack>
    struct CreateComponentFunction;
 
-   template<typename... Components>
+   template<typename... Components> 
    struct CreateComponentFunction<ComponentPack<Components...>>{
-      using ArgType = std::tuple<Components*...>;
+      using ArgType = std::tuple<const Components*...>;
       using type = std::function<void(void*, ArgType, std::size_t offset)>;
    };
 

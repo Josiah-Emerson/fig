@@ -95,47 +95,21 @@ namespace Core{
          // value or a nullptr if that pool does not contain the component
          // range becomes the number of entities for this comperand to draw
          std::size_t range { 0 };
-         for(std::size_t i { 0 }; i < GraphicsComponentIndex::NUM_COMPONENTS; ++i){
-            std::size_t tempRange { 0 };
-            switch(i){
-               case(GraphicsComponentIndex::POSITION):
-               {
-                  tempRange = getPtrAndRangeFromComponentTypeAndComperand(u, 
-                                          std::get<POSITION>(components));
-                  break;
-               }
-               case(GraphicsComponentIndex::DIRECTION):
-               {
-                  tempRange = getPtrAndRangeFromComponentTypeAndComperand(u, 
-                                          std::get<DIRECTION>(components));
-                  break;
-               }
-               case(GraphicsComponentIndex::SCALE):
-               {
-                  tempRange = getPtrAndRangeFromComponentTypeAndComperand(u, 
-                                          std::get<SCALE>(components));
-                  break;
-               }
-               case(GraphicsComponentIndex::COLOR):
-               {
-                  tempRange = getPtrAndRangeFromComponentTypeAndComperand(u, 
-                                          std::get<COLOR>(components));
-                  break;
-               }
-               case(NUM_COMPONENTS):
-                  assert(false && "HIT NUM_COMPONENTS IN SWITCH THAT SHOULD NEVER HAPPEN");
-               default: 
-                  assert(false && "Hit default in switch on GraphicsComponentIndex. A change must have happened to this enum which was not handled");
-            } // end switch 
+         std::apply([&u, &range, this](auto&... args){
+                  std::size_t ranges[sizeof...(args)];
+                  std::size_t idx { 0 };
+                  ((ranges[idx++] = getPtrAndRangeFromComponentTypeAndComperand(
+                                 u, &args)), ...);
+                  // ensure num of elements is correct 
+                  for(std::size_t i { 0 }; i < sizeof...(args); ++i){
+                     if(ranges[i] != 0){ // this component contains entries
+                        if(range == 0) // first encounter of a component pool containing entries
+                           range = ranges[i];
 
-            if(tempRange != 0 ){// contains components
-               if(range == 0 ){ // first encounter of a component pool containing entries
-                  range = tempRange;
-               }
-               // assert that the range is the same
-               assert(range == tempRange && "Component pool has a different number of entries than the rest");
-            }
-         } // end of component 'builder' for loop
+                        assert(range == ranges[i] && "Component pool has a different number of entries than the rest"); 
+                     }
+                  }
+               }, components);
 
          // loop through and draw all entities with this comperand
          for(std::size_t i { 0 }; i < range; ++i){

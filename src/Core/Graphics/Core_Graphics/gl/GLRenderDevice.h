@@ -34,7 +34,7 @@ namespace Core{
          // and comperand cmp. Returns the number of entries in this component pool with this value. 
          // if it does not exist, returns 0, and sets ptr to nullptr
          template<typename Component>
-         std::size_t getPtrAndRangeFromComponentTypeAndComperand(const GraphicsComperand& cmp, const Component* ptr);
+         std::size_t getPtrAndRangeFromComponentTypeAndComperand(const GraphicsComperand& cmp, Component** ptr);
 
          void* getDataPtr(ShaderDataType type);
          void deleteDataPtr(void* ptr, ShaderDataType type);
@@ -50,15 +50,15 @@ namespace Core{
     *
     */
    template<typename Component>
-   std::size_t GLRenderDevice::getPtrAndRangeFromComponentTypeAndComperand(const GraphicsComperand& cmp, const Component* ptr){
-      const auto& pool = m_registry.getPool<Component>();
+   std::size_t GLRenderDevice::getPtrAndRangeFromComponentTypeAndComperand(const GraphicsComperand& cmp, Component** ptr){
+      auto& pool = m_registry.getPool<std::remove_const_t<Component>>();
       if(!pool.containsComperand(cmp)){
-         ptr = nullptr;
+         *ptr = nullptr;
          return 0;
       }
 
       auto& separator = pool.separator(cmp);
-      ptr = &pool[separator.first];
+      *ptr = &pool[separator.first];
       return ((separator.second - separator.first) + 1);
    }
 } // namespace Core
