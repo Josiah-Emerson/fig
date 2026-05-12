@@ -3,7 +3,7 @@
 
 namespace Core{
 
-   Linear::fmat4 Camera::projectionMatrix(){
+   Linear::fmat4 Camera::projectionMatrix() const{
       return Linear::projectionMatrix(m_width / m_height, m_FOV, 0.1f, 100.f);
    }
 } // namespace Core

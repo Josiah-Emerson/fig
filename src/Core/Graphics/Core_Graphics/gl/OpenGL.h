@@ -16,7 +16,9 @@ namespace Core{
    typedef GLuint (APIENTRYP PFNGLCREATESHADERPROC) (GLenum shaderType);
    typedef void (APIENTRYP PFNGLDELETEPROGRAMPROC) (GLuint program);
    typedef void (APIENTRYP PFNGLDELETESHADERPROC) (GLuint shader);
+   typedef void (APIENTRYP PFNGLDEPTHFUNCPROC) (GLenum func);
    typedef void (APIENTRYP PFNGLDRAWARRAYSPROC) (GLenum mode, GLint first, GLsizei count);
+   typedef void (APIENTRYP PFNGLENABLEPROC) (GLenum cap);
    typedef void (APIENTRYP PFNGLENABLEVERTEXATTRIBARRAYPROC) (GLuint index);
    typedef void (APIENTRYP PFNGLGENBUFFERSPROC) (GLsizei n, GLuint *buffers);
    typedef void (APIENTRYP PFNGLGENVERTEXARRAYSPROC) (GLsizei n, GLuint *arrays);
@@ -31,6 +33,7 @@ namespace Core{
    typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONPROC) (GLuint program, const GLchar *name);
    typedef void (APIENTRYP PFNGLLINKPROGRAMPROC) (GLuint program);
    typedef void (APIENTRYP PFNGLSHADERSOURCEPROC) (GLuint shader, GLsizei count, const GLchar **string, const GLint *length);
+   typedef void (APIENTRYP PFNGLUNIFORM3FVPROC) (GLint location, GLsizei count, const GLfloat *value);
    typedef void (APIENTRYP PFNGLUNIFORMMATRIX4FVPROC) (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
    typedef void (APIENTRYP PFNGLUSEPROGRAMPROC) (GLuint program);
    typedef void (APIENTRYP PFNGLVALIDATEPROGRAMPROC) (GLuint program);
@@ -49,9 +52,11 @@ namespace Core{
       PFNGLCOMPILESHADERPROC glCompileShader;
       PFNGLCREATEPROGRAMPROC glCreateProgram;
       PFNGLCREATESHADERPROC glCreateShader;
+      PFNGLDEPTHFUNCPROC glDepthFunc;
       PFNGLDELETEPROGRAMPROC glDeleteProgram;
       PFNGLDELETESHADERPROC  glDeleteShader;
       PFNGLDRAWARRAYSPROC glDrawArrays;
+      PFNGLENABLEPROC glEnable;
       PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
       PFNGLGENBUFFERSPROC glGenBuffers;
       PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
@@ -66,6 +71,7 @@ namespace Core{
       PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
       PFNGLLINKPROGRAMPROC glLinkProgram;
       PFNGLSHADERSOURCEPROC glShaderSource;
+      PFNGLUNIFORM3FVPROC glUniform3fv;
       PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
       PFNGLUSEPROGRAMPROC glUseProgram;
       PFNGLVALIDATEPROGRAMPROC glValidateProgram;

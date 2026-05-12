@@ -10,6 +10,12 @@
 #include <utility>
 #include <vector>
 
+// TODO: NEED TO ADD SORTING BY ENTITYID WITHIN U-GROUPS TO ENSURE THAT ALL COMPONENT POOLS 
+// IN A REGISTRY STAY SYNCED. (For example: all the 'U-groups' will be sorted fine, however, 
+// I think there can be ways where if a component A is added for an entity later than another 
+// component B, then it might be later in that U sep list for B than in A such as index 9 instead of 8, 
+// and suddenly code which expects all pools 8th entry for that sep list to be the same entity fails)
+
 // TODO: update some of the update/adds to take in R-values to reduce copying
 // TODO: Sorting algorithm is likely far from optimized
 // NOTE: this is built with the idea of many different entities corresponding to a single 
@@ -52,6 +58,7 @@ namespace Core{
          // NOTE: returns false if entity is not in pool
          // returns true if updated or entity already has a comperand which is the same as the newComperand
          bool updateComperand(const EntityID, const U& newComperand);
+         bool containsComperand(const U& comperand) const;
 
          // returns element at position i from 0 to size()
          // NOTE: throws if not in bounds, so if you want to be efficient but dangerous used contiguousdata()
@@ -68,6 +75,9 @@ namespace Core{
          const Component* contiguousData() const;
 
          const std::map<U, Separator, Compare>& separatorList() const;
+
+         // throws exception if u is not in pool
+         const Separator& separator(const U& u) const;
 
          EntityID idFromIndex(const std::size_t idx) const;
 
@@ -290,6 +300,11 @@ namespace Core{
    }
 
    CLASS_TEMPLATE
+   bool SortedComponentPool<Component, Compare, U>::containsComperand(const U& comperand) const{
+      return m_separatorList.contains(comperand);
+   }
+
+   CLASS_TEMPLATE
    Component& SortedComponentPool<Component, Compare, U>::operator[](std::size_t i){
       if(i > (m_data.size() - 1))
          throw std::out_of_range("out of range in operator[] for SortedComponentPool");
@@ -335,6 +350,15 @@ namespace Core{
    }
 
    CLASS_TEMPLATE
+   const SortedComponentPool<Component, Compare, U>::Separator& SortedComponentPool<Component, Compare, U>::separator(const U& u) const {
+      auto search = m_separatorList.find(u);
+      if(search == m_separatorList.end())
+         throw std::out_of_range("Attempted to access separators for a comperand which is not held in this SortedComponentPool in function separator()");
+
+      return search->second;
+   }
+
+   CLASS_TEMPLATE
    EntityID SortedComponentPool<Component, Compare, U>::idFromIndex(const std::size_t idx) const{
       auto search = std::find_if(m_idToIndexMap.begin(), m_idToIndexMap.end(),
             [idx](std::pair<const EntityID, std::size_t> v){
@@ -345,6 +369,7 @@ namespace Core{
 
       return search->first;
    }
+
 
    /*
     *

@@ -10,7 +10,6 @@ target_sources(${target} PRIVATE
    ${target}/Model.cpp
    ${target}/RenderDevice.cpp
    ${target}/ShaderProgram.cpp
-   ${target}/tempGLDevice.cpp
    ${target}/gl/GLRenderDevice.cpp
    ${target}/gl/GLShader.cpp
    ${target}/gl/GLShaderProgram.cpp

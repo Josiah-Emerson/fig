@@ -1,3 +1,6 @@
+TODO: Update drawEntities function to be more component agnostic using the new 
+ArgType stuff in GraphicsComponents.h
+
 TODO: Add testing capabilities for different classes
 
 TODO: Implementing GLShaderProgram. Make it so that it can take a GLShader shared pointer as an argument (probalby a virtual func) to attach. 

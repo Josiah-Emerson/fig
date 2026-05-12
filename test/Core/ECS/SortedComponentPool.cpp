@@ -1,5 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include "Core_ECS/SortedComponentPool.h"
+// TODO: ADD TESTS FOR FOLLOWING FUNCS: 
+//    containsComperand()
+//    separator()
 
 struct testComperand{
    int outer;

@@ -3,6 +3,7 @@
 #include "Core_Utils/Concepts.h"
 #include "Core_Utils/Types.h"
 #include "SortedComponentPool.h"
+#include <algorithm>
 #include <functional>
 #include <stdexcept>
 #include <tuple>
@@ -13,6 +14,9 @@
 // and then calls the individual add/update function, which also checks if that entity exists. This means 
 // that a single addComponents call for 5 components on an entity checks if the ID exists 6 different times
 // It also (although not SortedComponentPool is not implemented yet) probably checks the id in ComponentPool as well 
+
+// Example for a SP that needs MVP and Color as its uniforms
+// Assume that the attribute input variables follow our layout and are good
 
 // TODO: How to actually iterate through
 // For example: 
@@ -40,6 +44,7 @@ namespace Core{
 #define CLASS_TEMPLATE template<typename U, typename Compare, typename... Components> \
    requires((Concepts::is_component<Components> && ...) && \
    std::strict_weak_order<Compare, U, U>)
+   //(Concepts::all_types_unique<Components...>) && \
    
    CLASS_TEMPLATE
    class SortedRegistry{
@@ -116,6 +121,10 @@ namespace Core{
          // See NOTE in updateComperand function for why 
          U& getComperand(const EntityID id);
          const U& getComperand(const EntityID id) const;
+         
+         // TODO: probably slow right now but current implementation is more for proof of concept than anything else rn
+         // Returns a sorted list of comperands in the registry
+         std::vector<U> getAllComperands() const;
 
       private: 
          void internalReserve(std::size_t n);
@@ -313,6 +322,19 @@ namespace Core{
    CLASS_TEMPLATE
    const U& SortedRegistry<U, Compare, Components...>::getComperand(const EntityID id) const{
       return m_entitiesToComperandMap.at(id);
+   }
+
+   CLASS_TEMPLATE
+   std::vector<U> SortedRegistry<U, Compare, Components...>::getAllComperands() const{
+      std::vector<U> ret {};
+      for(const std::pair<EntityID, U>& element : m_entitiesToComperandMap){
+         if(std::find(ret.begin(), ret.end(), element.second) == ret.end())
+            ret.push_back(element.second);
+      }
+
+      std::sort(ret.begin(), ret.end(), Compare());
+
+      return ret;
    }
 
    /*

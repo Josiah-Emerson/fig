@@ -1,6 +1,11 @@
 #include "ShaderProgram.h"
 
 namespace Core{
+   ShaderProgram::ShaderProgram() 
+      : m_state {NOT_CREATED, NONE}
+      , m_attributeVariables {}
+      , m_uniformVariables {}
+   { }
    bool ShaderProgram::isFailBitSet(const StageFailFlags bits, StageFailFlags_ flag) const{
       return bool(bits & flag);
    }

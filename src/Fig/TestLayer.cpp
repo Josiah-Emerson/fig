@@ -1,10 +1,10 @@
 #include "TestLayer.h"
-// TODO: definitely remove this 
-#include <GL/gl.h>
+#include <cstring>
 #include <memory>
-#include "Core_ECS/SortedComponentPool.h"
+#include "Application.h"
+#include "Core_Graphics/GraphicsComponents.h"
 #include "Core_Graphics/RenderDevice.h"
-#include "Core_Graphics/ShaderProgram.h"
+#include "Core_Utils/Linear/MatrixTransform.h"
 #include "Core_Utils/Linear/Vector.h"
 
 std::vector<float> g_posData{
@@ -88,14 +88,19 @@ TestLayer::TestLayer()
    : m_renderDevice {nullptr}
    , m_shaders { }
    , m_registry { }
+   , m_camera { {-8, 7, 3}, 70.f, 
+               static_cast<float>(Core::Application::get().getWindow()->getHeight()), 
+               static_cast<float>(Core::Application::get().getWindow()->getWidth()), 
+               {0, 0, 0}}
 {
-   m_renderDevice = Core::RenderDevice::createRenderDevice(m_registry.getPool<Core::PositionComponent>());
+   m_renderDevice = Core::RenderDevice::createRenderDevice(m_registry);
 
    // NOTE: rd becomes a shared_ptr and thus should be up to date with any state changed in the render device 
    m_registry.setComperandValidatorFunction(
          [rd = this->m_renderDevice](const Core::GraphicsComperand& cmp){
             return rd->isValidGraphicsComperand(cmp);
          });
+
 
    m_shaders[0] = m_renderDevice->createShader("./Resources/Shaders/Vertex.vs", 
                                                 Core::ShaderType::VERTEX_SHADER);
@@ -150,6 +155,26 @@ TestLayer::TestLayer()
       std::exit(0);
    }
 
+   // set m_shaderProgram's uniform var callbacks
+   // TODO: is capuring the camera lik this fine?
+   // TODO: How can we make it so that we can define the function params better? member function?
+   using ArgType = typename Core::CreateComponentFunction<Core::GraphicsComponentList>::ArgType;
+   m_shaderProgram->setUniformCallback("MVP", 
+         [&cam = this->m_camera](void* data, ArgType arg, std::size_t offset){
+            using namespace Core;
+
+            const PositionComponent* position = std::get<GraphicsComponentIndex::POSITION>(arg);
+            const ScaleComponent* scale = std::get<GraphicsComponentIndex::SCALE>(arg);
+            assert(position && "Position component is nullptr");
+            assert(scale && "Scale component is nullptr");
+
+            auto V = cam.viewMatrix();
+            auto P = cam.projectionMatrix();
+            auto M = Linear::modelMatrix(position[offset], scale[offset]);
+            auto MVP = P * V * M;
+            memcpy(data, &MVP, sizeof(MVP));
+         });
+
    // now that shaderProgram is linked, and we have a registered Model with renderDevice, we can register with the registry
    Core::Model rainbowModel { g_posData, g_posData };
    m_renderDevice->registerModel(rainbowModel);
@@ -157,12 +182,14 @@ TestLayer::TestLayer()
 
    m_registry.registerNewEntity(comp, Core::PositionComponent{0, 0, 0});
    m_registry.registerNewEntity(Core::GraphicsComperand{m_shaderProgram, std::make_shared<Core::Model>(rainbowModel)}, 
-                                Core::PositionComponent{-2, 3, -4.5});
+                                Core::PositionComponent{-2, 2, -4.5});
 }
 
 
 bool TestLayer::onEvent(Core::Events::Event& event) { return false; }
-void TestLayer::onUpdate() { }
+void TestLayer::onUpdate() { 
+   m_camera.pos() = m_camera.pos() + Core::Linear::fvec3{0, 0, 0.1};
+}
 void TestLayer::onRender() { 
    m_renderDevice->drawRegisteredEntities();
 }
