@@ -14,11 +14,12 @@ class TestLayer : public Core::Layer {
       void onRender() override;
 
    private: 
-      using ShaderList = std::array<std::shared_ptr<Core::Shader>, 2>;
+      using ShaderList = std::array<std::shared_ptr<Core::Shader>, 3>;
 
       std::shared_ptr<Core::RenderDevice> m_renderDevice;
       ShaderList m_shaders;
       std::shared_ptr<Core::ShaderProgram> m_shaderProgram;
+      std::shared_ptr<Core::ShaderProgram> m_unicolorShaderProgram;
       Core::GraphicsRegistry m_registry;
       Core::Camera m_camera;
    };

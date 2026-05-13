@@ -106,11 +106,14 @@ TestLayer::TestLayer()
                                                 Core::ShaderType::VERTEX_SHADER);
    m_shaders[1] = m_renderDevice->createShader("./Resources/Shaders/Fragment.fs", 
                                                 Core::ShaderType::FRAGMENT_SHADER);
+   m_shaders[2] = m_renderDevice->createShader("./Resources/Shaders/UnicolorVertex.vs",
+                                                Core::ShaderType::VERTEX_SHADER);
+
    Core::Model cubeModel {g_posData, g_colorData};
 
    assert(m_renderDevice->registerModel(cubeModel) && "Could not register model");
 
-   // Compile both shaders
+   // Compile shaders
 
    if(!m_shaders[0]->compile()){
       std::cout << "Vertex.vs is not compiled.\n";
@@ -124,6 +127,12 @@ TestLayer::TestLayer()
       std::exit(0);
    }
 
+   if(!m_shaders[2]->compile()){
+      std::cout << "UnicolorVertex.vs did not compile.\n";
+      std::cout << "Log info: " << m_shaders[2]->getLogInfo() << '\n';
+      std::exit(0);
+   }
+
    if(!m_shaders[0]->isCompiled()){
       std::cout << "Vertex.vs compile() returned true, but isCompiled() returns false\n";
       std::cout << "Log info: " << m_shaders[0]->getLogInfo() << '\n';
@@ -134,9 +143,18 @@ TestLayer::TestLayer()
       std::cout << "Log info: " << m_shaders[1]->getLogInfo() << '\n';
       std::exit(0);
    }
+   if(!m_shaders[2]->isCompiled()){
+      std::cout << "UnicolorVertex.vs compile() returned true, but isCompiled() returned false\n";
+      std::cout << "Log info: " << m_shaders[2]->getLogInfo() << '\n';
+      std::exit(0);
+   }
+
 
    m_shaderProgram = m_renderDevice->createShaderProgram();
    m_shaderProgram->initializeProgram();
+
+   m_unicolorShaderProgram = m_renderDevice->createShaderProgram();
+   m_unicolorShaderProgram->initializeProgram();
 
    // Add shaders and link
    if(!m_shaderProgram->addShader(m_shaders[0])){
@@ -155,12 +173,28 @@ TestLayer::TestLayer()
       std::exit(0);
    }
 
+   // UNICOLOR
+   if(!m_unicolorShaderProgram->addShader(m_shaders[2])){
+      std::cout << "Error adding UnicolorVertex.vs to the shader program\n";
+      std::cout << "Shader program log: " << m_unicolorShaderProgram->getInfoLog() << '\n';
+      std::exit(0);
+   }
+   if(!m_unicolorShaderProgram->addShader(m_shaders[1])){
+      std::cout << "Error adding Fragment.fs to the shader program\n";
+      std::cout << "Shader program log: " << m_unicolorShaderProgram->getInfoLog() << '\n';
+      std::exit(0);
+   }
+   if(!m_unicolorShaderProgram->link()){
+      std::cout << "Error linking program: " << m_unicolorShaderProgram->getInfoLog() << '\n';
+      std::exit(0);
+   }
+
+
    // set m_shaderProgram's uniform var callbacks
    // TODO: is capuring the camera lik this fine?
    // TODO: How can we make it so that we can define the function params better? member function?
    using ArgType = typename Core::CreateComponentFunction<Core::GraphicsComponentList>::ArgType;
-   m_shaderProgram->setUniformCallback("MVP", 
-         [&cam = this->m_camera](void* data, ArgType arg, std::size_t offset){
+   auto mvpCallback = [&cam = this->m_camera](void* data, ArgType arg, std::size_t offset){
             using namespace Core;
 
             const PositionComponent* position = std::get<const PositionComponent*>(arg);
@@ -176,9 +210,21 @@ TestLayer::TestLayer()
                   static_cast<ScaleComponent::Type>(scale[offset]));
             auto MVP = P * V * M;
             memcpy(data, &MVP, sizeof(MVP));
+   };
+
+   m_shaderProgram->setUniformCallback("MVP", mvpCallback);
+   m_unicolorShaderProgram->setUniformCallback("MVP", mvpCallback);
+   m_unicolorShaderProgram->setUniformCallback("color", 
+         [](void* data, ArgType arg, std::size_t offset){
+            using namespace Core;
+            const ColorComponent* color = std::get<const ColorComponent*>(arg);
+            assert(color && "Color component is nullptr");
+            data = (void*)color;
          });
 
    // now that shaderProgram is linked, and we have a registered Model with renderDevice, we can register with the registry
+   // NOTE: doing std::make_shared<Model>(model) creates a new shared ptr to the model each time I believe. Look into what is the 
+   // semantically correct way to do this
    Core::Model rainbowModel { g_posData, g_posData };
    m_renderDevice->registerModel(rainbowModel);
    Core::GraphicsComperand comp {m_shaderProgram, std::make_shared<Core::Model>(cubeModel)};
@@ -188,6 +234,10 @@ TestLayer::TestLayer()
    m_registry.registerNewEntity(Core::GraphicsComperand{m_shaderProgram, std::make_shared<Core::Model>(rainbowModel)}, 
                                 Core::PositionComponent{{-2, 2, -4.5}},
                                 Core::ScaleComponent{{1, 1, 1}});
+   m_registry.registerNewEntity(Core::GraphicsComperand{m_unicolorShaderProgram, std::make_shared<Core::Model>(cubeModel)},
+                                Core::PositionComponent{{2, 2, 3}},
+                                Core::ScaleComponent{{1, 1, 1}},
+                                Core::ColorComponent{{1, 0, 0}}); 
 }
 
 
