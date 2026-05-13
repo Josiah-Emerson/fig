@@ -1,6 +1,7 @@
 #include "Core_Graphics/gl/GLShaderProgram.h"
 #include "Core_Graphics/ShaderProgram.h"
 #include "Core_Graphics/gl/GLShader.h"
+#include <algorithm>
 #include <cassert>
 
 // IMPORTANT NOTE: see NOTE in addShader before implementing any function which would need to advance the m_stage
@@ -11,8 +12,6 @@ namespace Core{
       : ShaderProgram()
       , m_ID { 0 } // if ID is 0, openGL will silently ignore all (i think) requests related to this ID
       , m_openGL(openGL)
-      , m_attributeVariables {}
-      , m_uniformVariables {}
    { }
 
    GLShaderProgram::~GLShaderProgram(){
@@ -104,6 +103,8 @@ namespace Core{
    }
 
    bool GLShaderProgram::useProgram(){
+      // TODO: What happens if a uniform variable isn't set? 
+
       if(m_state.stage != LINKED || isFailBitSet(m_state.status, LINK_FAILED)){
          return false;
       }
@@ -201,13 +202,47 @@ namespace Core{
       }
    }
 
-   bool GLShaderProgram::setUniform(std::string_view name, void* value, ShaderDataType type){
-      if(type != F_MAT4)
+   bool GLShaderProgram::setUniformCallback(std::string_view name, UniformVariableSetterFunction callback){
+      auto search = std::find_if(m_uniformVariables.begin(), m_uniformVariables.end(), 
+            [name](const ShaderInputVariableInfo& var){
+               return name == var.name;
+            });
+      if(search == m_uniformVariables.end())
          return false;
-      // TODO: NOT GOOD VERY DANGEROUS BUT OH WELL
-      float* mat4 = (float*)value;
-      GLint matID = m_openGL.glGetUniformLocation(m_ID, "MVP");
-      m_openGL.glUniformMatrix4fv(matID, 1, GL_FALSE, mat4);
+      search->callback = std::move(callback);
+      return true;
+   }
+
+   bool GLShaderProgram::setUniform(std::string name, void* value){
+      // TODO: add functionality for other data types 
+
+      auto search = std::find_if(m_uniformVariables.begin(), m_uniformVariables.end(), 
+            [name](const ShaderInputVariableInfo& var){
+               return name == var.name;
+            });
+      if(search == m_uniformVariables.end())
+         return false;
+
+      ShaderDataType type = search->type;
+
+      GLint uID = m_openGL.glGetUniformLocation(m_ID, name.c_str());
+      if(uID == -1)
+         return false;
+
+      switch(type){
+         case(F_VEC3):
+            {
+               m_openGL.glUniform3fv(uID, 1, (float*)value);
+               break;
+            }
+         case(F_MAT4):
+            {
+               m_openGL.glUniformMatrix4fv(uID, 1, GL_TRUE, (float*)value);
+               break;
+            }
+         default: 
+            return false;
+      }
       return true;
    }
 

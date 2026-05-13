@@ -25,7 +25,8 @@ namespace Core{
          const std::vector<ShaderInputVariableInfo>& getUniformVariables() const override { return m_uniformVariables; }
          const std::vector<ShaderInputVariableInfo>& getAttributeVariables() const override { return m_attributeVariables; }
 
-         bool setUniform(std::string_view name, void* value, ShaderDataType type) override;
+         bool setUniformCallback(std::string_view name, UniformVariableSetterFunction callback) override;
+         bool setUniform(std::string name, void* value) override;
          bool setAttribute(std::string_view name, void* value, ShaderDataType type) override { return false;}
 
       private: 
@@ -38,8 +39,6 @@ namespace Core{
          GLuint m_ID; 
          // NOTE: for vectors below, the index of an input variable in openGL should (?) match its index in the vector since that is how it is populated
          // TODO/NOTE: This is possibly only true for shaders which specify layout = x or whatever. Should probably have a better way of doing that so that it is always correct
-         std::vector<ShaderInputVariableInfo> m_attributeVariables; 
-         std::vector<ShaderInputVariableInfo> m_uniformVariables;
    };
 } // namespace Core
 

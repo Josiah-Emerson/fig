@@ -1,9 +1,11 @@
 #include "GLRenderDevice.h"
-#include "Core_Graphics/Camera.h"
-#include "Core_Utils/Linear/MatrixTransform.h"
+#include "Core_Graphics/GraphicsComponents.h"
+#include "Core_Graphics/RenderDevice.h"
+#include "Core_Graphics/ShaderProgram.h"
 #include "GLShader.h"
 #include "GLShaderProgram.h"
 #include <memory>
+#include <tuple>
 
 namespace Core{
    bool GLRenderDevice::registerModel(Model& model){
@@ -61,73 +63,139 @@ namespace Core{
    }
 
    void GLRenderDevice::drawRegisteredEntities() {
-      // Get an iterator for ShaderProgram and Model
-      // Use Program
-      // For each ShaderProgram and model combo set the uniform (Assume it is MVP)
-
-      // TODO: how do we pass the necessary values here? 
-      // Example: for the MVP matrix we could pass the camera through the function here, 
-      // (cuz we def don't want it to be owned by RenderDevice), but if different programs 
-      // require different things, we probably need to inject something 
-      // For testing just create a camera here I guess
-
-      Camera cam {{10, 10, 10}, 45.f, 1080, 1920, {0, 0, 0}};
-      auto V = cam.viewMatrix();
-      auto P = cam.projectionMatrix();
-
-      const auto& iterators = m_positionPool.separatorList();
+      std::vector<GraphicsComperand> gComps = m_registry.getAllComperands();
       std::shared_ptr<ShaderProgram> currBoundProgram { nullptr };
       std::shared_ptr<Model> currBoundModel { nullptr };
-
-      // TODO: depending on final form, look at hoisting out commonly looked at vars 
-      // into a local var for better cache
-      for(const auto& it : iterators){
-         const GraphicsComperand& gComp = it.first;
-         const auto& separator = it.second;
-         // If ShaderProgram in iterator changes, rebind 
-
-         if(gComp.prog != currBoundProgram){
-            assert(gComp.prog->useProgram() && "Error using program");
-            currBoundProgram = gComp.prog;
+      for(const GraphicsComperand& u : gComps){
+         if(u.prog != currBoundProgram){
+            assert(u.prog->useProgram() && "Error using program");
+            currBoundProgram = u.prog;
          }
 
-         if(gComp.model != currBoundModel){
+         if(u.model != currBoundModel){
             auto search = std::find_if(m_modelVAOList.begin(), m_modelVAOList.end(), 
-                  [&gComp](const std::pair<const Model&, GLuint>& v){
-                     return v.first == *gComp.model;
+                  [&u](const std::pair<const Model&, GLuint>& v){
+                     return v.first == *(u.model);
                   });
-
-            assert(search != m_modelVAOList.end() && "model in pool not found in RenderDevice");
+            assert(search != m_modelVAOList.end() && "Model in pool not found in RenderDevice list");
             m_openGL.glBindVertexArray(search->second);
-
-            currBoundModel = gComp.model;
+            currBoundModel = u.model;
          }
 
-         //                     [first, second]
-         // <= cuz separator is [lower, upper ] inclusive
-         for(std::size_t i { separator.first }; i <= separator.second; ++i){
-            // build MVP matrix here
-            // MVP = P * V * M
-            auto val = m_positionPool[i];
-
-            // Example: 1 ShaderProgram has MVP uniform and one has MVP and COLOR uniform
-            // MVP is mat4 in both and COLOR is vec3. How do we go about so that it knows 
-            // which one, and how to use it 
-            // an entity using program 1 would have an entry in position pool which could be used to calculate
-            // MVP, while an entity using program 2 would have that AND an entry in colorPool 
-            // with its color value
-            // in this case every shaderProgram would have an associated set of pools with the 
-            // data it needs and how to transform that data? 
-
-            auto M = Linear::modelMatrix(val, Linear::Vector{1, 1, 1});
-            auto MVP = P * V * M;
-            auto MVP_T = MVP.transpose();
-            assert(currBoundProgram->setUniform("MVP", &MVP_T, F_MAT4) && "Could not setUniform");
-
-            m_openGL.glDrawArrays(GL_TRIANGLES, 0, 12 * 3); // NOTE: look how hardcoded this is, must be a better way
-         }
+         using ArgHelperType = typename CreateComponentFunction<GraphicsComponentList>::ArgType;
+         ArgHelperType components {};
          
+         // Gross for now but oh well
+         // Loops through all component types and sets the pointer to either the first valid 
+         // value or a nullptr if that pool does not contain the component
+         // range becomes the number of entities for this comperand to draw
+         std::size_t range { 0 };
+         std::apply([&u, &range, this](auto&... args){
+                  std::size_t ranges[sizeof...(args)];
+                  std::size_t idx { 0 };
+                  ((ranges[idx++] = getPtrAndRangeFromComponentTypeAndComperand(
+                                 u, &args)), ...);
+                  // ensure num of elements is correct 
+                  for(std::size_t i { 0 }; i < sizeof...(args); ++i){
+                     if(ranges[i] != 0){ // this component contains entries
+                        if(range == 0) // first encounter of a component pool containing entries
+                           range = ranges[i];
+
+                        assert(range == ranges[i] && "Component pool has a different number of entries than the rest"); 
+                     }
+                  }
+               }, components);
+
+         // loop through and draw all entities with this comperand
+         for(std::size_t i { 0 }; i < range; ++i){
+            const auto& uniformVars = currBoundProgram->getUniformVariables();
+            for(const auto& uVar : uniformVars){
+               void* data = getDataPtr(uVar.type);
+               uVar.callback(data, components, i);
+               currBoundProgram->setUniform(uVar.name, data);
+               deleteDataPtr(data, uVar.type);
+            }
+
+            // TODO: Make this depend on the model
+            m_openGL.glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+         }
       }
    }
+
+   void* GLRenderDevice::getDataPtr(ShaderDataType type){
+      void* data = nullptr;
+      switch(type){
+         case(INT):
+            {
+               data = new int;
+               break;
+            }
+         case(FLOAT): 
+            {
+               data = new float;
+               break;
+            }
+         case(DOUBLE): 
+            {
+               data = new double;
+               break;
+            }
+         case(F_VEC3): 
+            {
+               data = new float[3];
+               break;
+            }
+         case(F_MAT4): 
+            {
+               data = new float[16];
+               break;
+            }
+         case(UNKNOWN):
+         default: 
+            assert(false && "Unknown ShaderDataType encounted in getDataPtr func");
+      }
+
+      return data;
+   }
+
+   void GLRenderDevice::deleteDataPtr(void* ptr, ShaderDataType type){
+      assert(ptr && "nullptr passed to GLRenderDevice::deleteDataPtr");
+      switch(type){
+         case(INT):
+            {
+               int* data = static_cast<int*>(ptr);
+               delete data;
+               break;
+            }
+         case(FLOAT): 
+            {
+               float* data = static_cast<float*>(ptr);
+               delete data;
+               break;
+            }
+         case(DOUBLE): 
+            {
+               double* data = static_cast<double*>(ptr);
+               delete data;
+               break;
+            }
+         case(F_VEC3): 
+            {
+               float* data = static_cast<float*>(ptr);
+               delete[] data;
+               break;
+            }
+         case(F_MAT4): 
+            {
+               float* data = static_cast<float*>(ptr);
+               delete[] data;
+               break;
+            }
+         case(UNKNOWN):
+         default: 
+            assert(false && "Unknown ShaderDataType encounted in deleteDataPtr func");
+      }
+   }
+
 
 } // namespace Core

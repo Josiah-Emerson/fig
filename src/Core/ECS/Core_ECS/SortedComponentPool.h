@@ -10,6 +10,10 @@
 #include <utility>
 #include <vector>
 
+// TODO: First update tests to confirm that they are actually sorted by EntityIDs within U-groups 
+// TODO: Second once we can assume they are properly sorted by IDs within groups, I am sure there are some 
+// search optimizations which can be made using this knowledge
+
 // TODO: update some of the update/adds to take in R-values to reduce copying
 // TODO: Sorting algorithm is likely far from optimized
 // NOTE: this is built with the idea of many different entities corresponding to a single 
@@ -52,6 +56,7 @@ namespace Core{
          // NOTE: returns false if entity is not in pool
          // returns true if updated or entity already has a comperand which is the same as the newComperand
          bool updateComperand(const EntityID, const U& newComperand);
+         bool containsComperand(const U& comperand) const;
 
          // returns element at position i from 0 to size()
          // NOTE: throws if not in bounds, so if you want to be efficient but dangerous used contiguousdata()
@@ -68,6 +73,9 @@ namespace Core{
          const Component* contiguousData() const;
 
          const std::map<U, Separator, Compare>& separatorList() const;
+
+         // throws exception if u is not in pool
+         const Separator& separator(const U& u) const;
 
          EntityID idFromIndex(const std::size_t idx) const;
 
@@ -175,6 +183,8 @@ namespace Core{
          // so for the beginning: [0,0], 
          // the end: n = size of m_data after insertions: [n-1, n-1]
          // and in the middle: n = the beginning of the separator after it [n, n]
+         // If U does not exist then once it is inserted, then it is automatically already 
+         // sorted by ID
 
          if(iter == m_separatorList.begin()){
             // No need to update separator since it is alrady [0, 0]
@@ -190,8 +200,30 @@ namespace Core{
             firstInvalidSeparatorIterator = std::next(iter);
          }
       } else { // U exists
-         firstInvalidatedIndex = newElementIndex = ++(search->second.second);  // increment separator we are in
+         // Sort by ID
+         // NOTE: Start at end first because it is likely the case that larger EntityIDs are added later
+         bool found { false };
+         for(std::size_t idx {search->second.second}; idx > search->second.first; --idx){
+            if(id > idFromIndex(idx)){
+               found = true;
+               newElementIndex = idx + 1;
+               break;
+            }
+         }
+
+         // TODO: see cleaner way to check this, possibly a while loop or something
+         // last element not checked to avoid wrapping around 
+
+         if(!found){
+            newElementIndex = search->second.first;
+            if(id > idFromIndex(search->second.first))
+               ++newElementIndex;
+         }
+
+         firstInvalidatedIndex = newElementIndex; 
+         ++(search->second.second); // increment separator we are in
          firstInvalidSeparatorIterator = std::next(search);
+
       }
 
       incrementInvalidIndices(firstInvalidatedIndex);
@@ -283,10 +315,17 @@ namespace Core{
          return true;
 
       // TODO: possibly more efficent way but this works for now
+      // NOTE: If we update this to not just be a removal and new insertion, 
+      // we need to remember to sort within the comperand group by EntityID 
       Component data = this->id(id);
       remove(id);
 
       return insert(id, data, newComperand);
+   }
+
+   CLASS_TEMPLATE
+   bool SortedComponentPool<Component, Compare, U>::containsComperand(const U& comperand) const{
+      return m_separatorList.contains(comperand);
    }
 
    CLASS_TEMPLATE
@@ -335,6 +374,15 @@ namespace Core{
    }
 
    CLASS_TEMPLATE
+   const SortedComponentPool<Component, Compare, U>::Separator& SortedComponentPool<Component, Compare, U>::separator(const U& u) const {
+      auto search = m_separatorList.find(u);
+      if(search == m_separatorList.end())
+         throw std::out_of_range("Attempted to access separators for a comperand which is not held in this SortedComponentPool in function separator()");
+
+      return search->second;
+   }
+
+   CLASS_TEMPLATE
    EntityID SortedComponentPool<Component, Compare, U>::idFromIndex(const std::size_t idx) const{
       auto search = std::find_if(m_idToIndexMap.begin(), m_idToIndexMap.end(),
             [idx](std::pair<const EntityID, std::size_t> v){
@@ -345,6 +393,7 @@ namespace Core{
 
       return search->first;
    }
+
 
    /*
     *

@@ -24,16 +24,16 @@ namespace Core{
       return lhs.model < rhs.model;
    }
 
-   RenderDevice::RenderDevice(const PositionPool& positionPool)
-      : m_positionPool { positionPool }
+   RenderDevice::RenderDevice(const GraphicsRegistry& registry)
+      : m_registry { registry }
    { }
 
-   std::shared_ptr<RenderDevice> RenderDevice::createRenderDevice(const PositionPool& positionPool){
+   std::shared_ptr<RenderDevice> RenderDevice::createRenderDevice(const GraphicsRegistry& registry){
       std::shared_ptr<RenderDevice> ret = nullptr;
 
       // TODO: Other graphics when ready
 #if defined(OPENGL)
-      ret = std::make_shared<GLRenderDevice>(positionPool);
+      ret = std::make_shared<GLRenderDevice>(registry);
 #endif
 
       return ret;

@@ -30,9 +30,10 @@ namespace Core{
 
          // MVP = P * V * M
          template<typename T = float>
-         auto viewMatrix();
+         auto viewMatrix() const;
 
-         Linear::fmat4 projectionMatrix();
+         Linear::fmat4 projectionMatrix() const;
+         Linear::fvec3& pos() { return m_pos; }
 
       private:
          Linear::fvec3 m_pos; // Position of camera in world coordinates
@@ -44,7 +45,7 @@ namespace Core{
 
    // NOTE:: T is a default arg
    template<typename T>
-   auto Camera::viewMatrix(){
+   auto Camera::viewMatrix() const{
       return Linear::viewMatrix(m_pos, m_look, Linear::Vector(0, 1, 0));
    }
 

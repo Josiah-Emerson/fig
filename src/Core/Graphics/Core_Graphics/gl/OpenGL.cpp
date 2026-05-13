@@ -1,4 +1,5 @@
 #include "Core_Graphics/gl/OpenGL.h"
+#include <GL/gl.h>
 #include <stdexcept>
 // MACROS
 // Load function
@@ -19,9 +20,11 @@ namespace Core{
       FETCH_GL_FUNC(PFNGLCOMPILESHADERPROC, glCompileShader);
       FETCH_GL_FUNC(PFNGLCREATEPROGRAMPROC, glCreateProgram);
       FETCH_GL_FUNC(PFNGLCREATESHADERPROC, glCreateShader);
+      FETCH_GL_FUNC(PFNGLDEPTHFUNCPROC, glDepthFunc);
       FETCH_GL_FUNC(PFNGLDELETEPROGRAMPROC, glDeleteProgram);
       FETCH_GL_FUNC(PFNGLDELETESHADERPROC,  glDeleteShader);
       FETCH_GL_FUNC(PFNGLDRAWARRAYSPROC, glDrawArrays);
+      FETCH_GL_FUNC(PFNGLENABLEPROC, glEnable);
       FETCH_GL_FUNC(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray);
       FETCH_GL_FUNC(PFNGLGENBUFFERSPROC, glGenBuffers);
       FETCH_GL_FUNC(PFNGLGENVERTEXARRAYSPROC, glGenVertexArrays);
@@ -36,10 +39,16 @@ namespace Core{
       FETCH_GL_FUNC(PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation);
       FETCH_GL_FUNC(PFNGLLINKPROGRAMPROC, glLinkProgram);
       FETCH_GL_FUNC(PFNGLSHADERSOURCEPROC, glShaderSource);
+      FETCH_GL_FUNC(PFNGLUNIFORM3FVPROC, glUniform3fv);
       FETCH_GL_FUNC(PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv);
       FETCH_GL_FUNC(PFNGLUSEPROGRAMPROC, glUseProgram);
       FETCH_GL_FUNC(PFNGLVALIDATEPROGRAMPROC, glValidateProgram);
       FETCH_GL_FUNC(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer);
+
+      // General setup for openGL
+      // These two ensure that vertexes are drawn via depth, and thus weird things like incorrect ordering of verticies happen
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LESS);
    }
 
    bool OpenGL::operator==(const OpenGL& other) const{
