@@ -3,6 +3,7 @@
 // TODO: ADD TESTS FOR FOLLOWING FUNCS: 
 //    containsComperand()
 //    separator()
+//    Add tests to ensure that the pools stay synced for IDs 
 
 struct testComperand{
    int outer;
@@ -339,12 +340,12 @@ TEST_CASE("Tests on a populated SortedComponentPool", "[SortedComponentPool]"){
    }
 
    SECTION("updateComperand"){
-REQUIRE(pool.id(70) == 70);
+REQUIRE(pool.id(70) == 70); // TODO: Don't have the time right now but figure out if this was here for a reason or not?
 
       // update id 0 to have a comperand of da (i.e. back)
       REQUIRE(pool.updateComperand(0, da));
       REQUIRE(pool.size() == 100);
-      REQUIRE(pool[pool.size() - 1] == 0);
+      REQUIRE(pool[pool.size() - 11] == 0); // -11 because it should be sorted by EntityIDs now 
 
       // update id 99 to have a comperand aa (i.e. should go in back of front group or index 9 for now)
       REQUIRE(pool.updateComperand(99, aa));
@@ -364,10 +365,20 @@ REQUIRE(pool.id(70) == 70);
       REQUIRE(pool.size() == 100);
       REQUIRE(pool[0] == 50);
 
+      // update an id lower than 50 to have the same comperand (and it should jump before it)
+      REQUIRE(pool.updateComperand(43, {-1, -1}));
+      REQUIRE(pool.size() == 100);
+      REQUIRE(pool[0] == 43); 
+
       // update an id to have a comperand not yet seen at end
       REQUIRE(pool.updateComperand(70, {3, 3}));
       REQUIRE(pool.size() == 100);
       REQUIRE(pool[99] == 70);
+
+      // update an id lower than 70 to have the same comperand (and it should jump before it)
+      REQUIRE(pool.updateComperand(67, {3, 3}));
+      REQUIRE(pool.size() == 100);
+      REQUIRE(pool[pool.size() - 2] == 67); // second to last should be 67 now
 
       // update to a new one in the middle (essentially bd)
       // should be at position 60

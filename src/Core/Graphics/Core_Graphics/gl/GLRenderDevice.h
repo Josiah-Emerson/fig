@@ -1,9 +1,7 @@
 #pragma once
 #include "Application.h"
-#include "Core_Graphics/GraphicsComponents.h"
 #include "Core_Graphics/gl/OpenGL.h"
 #include "Core_Graphics/RenderDevice.h"
-#include "Core_Utils/Concepts.h"
 #include <utility>
 
 namespace Core{
