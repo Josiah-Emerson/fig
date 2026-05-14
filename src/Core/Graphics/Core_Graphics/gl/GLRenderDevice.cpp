@@ -111,9 +111,13 @@ namespace Core{
             const auto& uniformVars = currBoundProgram->getUniformVariables();
             for(const auto& uVar : uniformVars){
                void* data = getDataPtr(uVar.type);
-               uVar.callback(data, components, i);
+               void* oldData = data; // if callback re-points elsewhere we need to 
+                                     // know what the old ptr was to not leak memory
+                                     // if callback copies into this location, then we are fine 
+                                     // to delete it anyways as setUniform will send the data where we need
+               uVar.callback(&data, components, i);
                currBoundProgram->setUniform(uVar.name, data);
-               deleteDataPtr(data, uVar.type);
+               deleteDataPtr(oldData, uVar.type); // delete the allocated bit from getDataPtr
             }
 
             // TODO: Make this depend on the model

@@ -61,7 +61,7 @@ namespace Core{
    template<typename... Components> 
    struct CreateComponentFunction<ComponentPack<Components...>>{
       using ArgType = std::tuple<const Components*...>;
-      using type = std::function<void(void*, ArgType, std::size_t offset)>;
+      using type = std::function<void(void**, ArgType, std::size_t offset)>;
    };
 
    // End of gross type stuff
