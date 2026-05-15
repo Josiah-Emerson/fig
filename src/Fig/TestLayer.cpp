@@ -194,7 +194,7 @@ TestLayer::TestLayer()
    // TODO: is capuring the camera lik this fine?
    // TODO: How can we make it so that we can define the function params better? member function?
    using ArgType = typename Core::CreateComponentFunction<Core::GraphicsComponentList>::ArgType;
-   auto mvpCallback = [&cam = this->m_camera](void* data, ArgType arg, std::size_t offset){
+   auto mvpCallback = [&cam = this->m_camera](void** data, ArgType arg, std::size_t offset){
             using namespace Core;
 
             const PositionComponent* position = std::get<const PositionComponent*>(arg);
@@ -209,17 +209,17 @@ TestLayer::TestLayer()
                   static_cast<PositionComponent::Type>(position[offset]), 
                   static_cast<ScaleComponent::Type>(scale[offset]));
             auto MVP = P * V * M;
-            memcpy(data, &MVP, sizeof(MVP));
+            memcpy(*data, &MVP, sizeof(MVP));
    };
 
    m_shaderProgram->setUniformCallback("MVP", mvpCallback);
    m_unicolorShaderProgram->setUniformCallback("MVP", mvpCallback);
    m_unicolorShaderProgram->setUniformCallback("color", 
-         [](void* data, ArgType arg, std::size_t offset){
+         [](void** data, ArgType arg, std::size_t offset){
             using namespace Core;
             const ColorComponent* color = std::get<const ColorComponent*>(arg);
             assert(color && "Color component is nullptr");
-            data = (void*)color;
+            *data = (void*)color;
          });
 
    // now that shaderProgram is linked, and we have a registered Model with renderDevice, we can register with the registry

@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "OverlayLayer.h"
+#include "TestLayer2.h"
 #include "UncaughtEventsOutputLayer.h"
 #include "TestLayer.h"
 
@@ -12,6 +13,7 @@ int main(){
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
    app.pushLayer<TestLayer>();
+   app.pushLayer<TestLayer2>();
    app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }

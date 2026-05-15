@@ -62,6 +62,10 @@ namespace Core{
    struct CreateComponentFunction<ComponentPack<Components...>>{
       using ArgType = std::tuple<const Components*...>;
       using type = std::function<void(void**, ArgType, std::size_t offset)>;
+      // NOTE: Because of the update to void**, ensure you either: 
+      // A) Copy: memcpy(*data, src, size) not memcpy(data, src, size) where data is void**
+      // B) Re-point: *data = (void*)ComponentPtr where data is void** and ComponentPtr is a ptr to the correct component
+      // See MVP and Color uses in some Layers
    };
 
    // End of gross type stuff

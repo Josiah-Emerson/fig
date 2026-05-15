@@ -93,6 +93,11 @@ namespace Core{
                         ImGui::DragInt(dataInfo->propertyName.c_str(), (int*)dataInfo->data, 1.f, 0, 255);
                         break;
                      }
+                     case(ImGuiDataType_Float):
+                     {
+                        ImGui::DragFloat(dataInfo->propertyName.c_str(), (float*)dataInfo->data, 1.f, 0, 255);
+                        break;
+                     }
                      default:
                         assert(false && "Data type not handled");
                   }

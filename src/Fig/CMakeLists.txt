@@ -10,6 +10,7 @@ add_executable(${project})
 target_sources(${project} PRIVATE
    OverlayLayer.cpp
    TestLayer.cpp
+   TestLayer2.cpp
    UncaughtEventsOutputLayer.cpp
    main.cpp
 )
