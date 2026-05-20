@@ -34,6 +34,8 @@ namespace Core{
 
          Linear::fmat4 projectionMatrix() const;
          Linear::fvec3& pos() { return m_pos; }
+         float& fov() { return m_FOV; }
+         Linear::fvec3& look() { return m_look; }
 
       private:
          Linear::fvec3 m_pos; // Position of camera in world coordinates

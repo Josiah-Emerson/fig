@@ -1,4 +1,3 @@
-TODO: Biggest thing is add sorting by entity ID into SortedComponentPools so that they stay synced up
 Things to think about: 
    1) With the new ComponentTag system do we want to have the Tags inherit from ComponentTag? 
    2) Will probably need to think about refactoring so that all the components go in their own place, 

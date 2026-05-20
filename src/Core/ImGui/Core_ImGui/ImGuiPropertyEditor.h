@@ -33,7 +33,7 @@ namespace Core{
          struct DataInfo{
             std::string propertyName;
             ImGuiDataType dataType { ImGuiDataType_COUNT };
-            void* const data { nullptr };
+            void* data { nullptr };
          };
 
       private: 

@@ -18,6 +18,10 @@ namespace Core{
 
       enum class Key{
          ESCAPE,
+         W,
+         A,
+         S,
+         D,
          OTHER,
       };
 

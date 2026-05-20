@@ -90,12 +90,12 @@ namespace Core{
                   switch(dataInfo->dataType){
                      case(ImGuiDataType_S32):
                      {
-                        ImGui::DragInt(dataInfo->propertyName.c_str(), (int*)dataInfo->data, 1.f, 0, 255);
+                        ImGui::DragInt(dataInfo->propertyName.c_str(), (int*)dataInfo->data, 1.f);
                         break;
                      }
                      case(ImGuiDataType_Float):
                      {
-                        ImGui::DragFloat(dataInfo->propertyName.c_str(), (float*)dataInfo->data, 1.f, 0, 255);
+                        ImGui::DragFloat(dataInfo->propertyName.c_str(), (float*)dataInfo->data, 1.f);
                         break;
                      }
                      default:
@@ -116,7 +116,10 @@ namespace Core{
       const Node& node = m_nodes[nodeIdx];
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
-      ImGui::PushID("##"); // TODO: Change if we end up caring about the ID
+      static int i { 0 }; // TODO: This works but why doesn't 
+                          // "##" work?
+      ImGui::PushID(i++);
+      // ImGui::PushID("##"); // TODO: Change if we end up caring about the ID
       ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow |
                                  ImGuiTreeNodeFlags_SpanFullWidth /* | 
                                  ImGuiTreeNodeFlags_DrawLinesToNodes */;
@@ -132,7 +135,7 @@ namespace Core{
          ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
 
       // TreeNodeEx pushes this node to the tree and returns true if this node is open and we need to pop
-      bool nodeOpen = ImGui::TreeNodeEx("", flags, "%s", node.name.c_str()); 
+       bool nodeOpen = ImGui::TreeNodeEx("##", flags, "%s", node.name.c_str());
       
       if(node.dataInfoArr.empty())
          ImGui::PopStyleColor();

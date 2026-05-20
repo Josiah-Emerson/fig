@@ -68,6 +68,14 @@ namespace Core{
                                              (Concepts::all_types_unique<Args...>))
          EntityID registerNewEntity(const U& comperand, Args&&... args);
 
+         // TODO: For now, I have to do somehting like: 
+         /*
+         m_graphicsRegistry.setComperandValidatorFunction(
+               [&rd = this->m_renderDevice](const Core::GraphicsComperand& cmp){
+                  return rd->isValidGraphicsComperand(cmp);
+               });
+          */
+         // Instead of just setComperandFunction(rd->isValid); 
          void setComperandValidatorFunction(std::function<bool(const U&)> func);
 
          bool containsEntity(const EntityID) const;

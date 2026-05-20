@@ -121,7 +121,7 @@ namespace Core{
             }
 
             // TODO: Make this depend on the model
-            m_openGL.glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+            m_openGL.glDrawArrays(GL_TRIANGLES, 0, currBoundModel->triangles() * 3);
          }
       }
    }

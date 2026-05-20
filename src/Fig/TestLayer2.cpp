@@ -12,9 +12,9 @@
 TestLayer2::TestLayer2()
    : m_renderDevice { nullptr }
    , m_program { nullptr } 
-   , m_camera {Core::Linear::fvec3{0,0,30}, 45.f, 
+   , m_camera {Core::Linear::fvec3{0,0,20}, 60.f, 
                static_cast<float>(Core::Application::get().getWindow().get()->getHeight()),
-               static_cast<float>(Core::Application::get().getWindow().get()->getHeight()),
+               static_cast<float>(Core::Application::get().getWindow().get()->getWidth()),
                Core::Linear::fvec3{0,0,0}}
    , m_registry { }
    , m_propertyEditor { nullptr }
@@ -115,7 +115,7 @@ m_program = m_renderDevice->createShaderProgram(); m_program->initializeProgram(
 
    constexpr int X_SPACE { 2 + WIDTH };
    constexpr int Y_SPACE { 2 + HEIGHT };
-   constexpr int Z_SPACE { 2 + DEPTH };
+   constexpr int Z_SPACE { 5 + DEPTH };
 
    // start at top left and build across and then down 
    constexpr float X_INITIAL {((NUM_X - 1)/2.f) * X_SPACE * -1};
@@ -127,30 +127,40 @@ m_program = m_renderDevice->createShaderProgram(); m_program->initializeProgram(
       Z_INITIAL
    }};
 
-   Core::GraphicsComperand cmp { m_program, std::make_shared<Core::Model>(model)};
+   std::shared_ptr<Core::Model> regModel = std::make_shared<Core::Model>(model);
+   std::shared_ptr<Core::Model> rainbowModel = std::make_shared<Core::Model>(g_posData, g_posData);
+   m_renderDevice->registerModel(*rainbowModel);
 
-   for(std::size_t y { 0 }; y < NUM_Y; ++y){
-      for(std::size_t x { 0 }; x < NUM_X; ++x){
-         m_registry.registerNewEntity(cmp,
-                                      Core::PositionComponent{position.val},
-                                      Core::ScaleComponent{{1,1,1}},
-                                      Core::ColorComponent{{0, 1, 0}});
-         position.val[0] += X_SPACE;
+   std::shared_ptr<Core::ShaderProgram> m_regProg = m_renderDevice->createShaderProgram();
+   std::shared_ptr<Core::Shader> m_regSh = m_renderDevice->createShader("Resources/Shaders/Vertex.vs", Core::ShaderType::VERTEX_SHADER);
+   m_regSh->compile();
+   m_regProg->initializeProgram();
+   m_regProg->addShader(m_regSh);
+   m_regProg->addShader(fragmentShader);
+   m_regProg->link();
+   m_regProg->setUniformCallback("MVP", mvp);
+
+   Core::GraphicsComperand cmpArr[3] = {
+      {m_program, regModel},
+      {m_regProg, regModel},
+      {m_regProg, rainbowModel}
+   };
+
+   for(std::size_t z { 0 }; z < NUM_Z; ++z){
+      for(std::size_t y { 0 }; y < NUM_Y; ++y){
+         for(std::size_t x { 0 }; x < NUM_X; ++x){
+            m_registry.registerNewEntity(cmpArr[z],
+                                         Core::PositionComponent{position.val},
+                                         Core::ScaleComponent{{1,1,1}},
+                                         Core::ColorComponent{{0, 1, 0}});
+            position.val[0] += X_SPACE;
+         }
+         position.val[0] = X_INITIAL;
+         position.val[1] -= Y_SPACE;
       }
-      position.val[0] = X_INITIAL;
-      position.val[1] -= Y_SPACE;
+      position.val[1] = Y_INITIAL;
+      position.val[2] -= Z_SPACE;
    }
-
-   std::shared_ptr<Core::ShaderProgram> rainbow = m_renderDevice->createShaderProgram();
-   std::shared_ptr<Core::Shader> rshader = m_renderDevice->createShader("Resources/Shaders/Vertex.vs", Core::ShaderType::VERTEX_SHADER);
-   rshader->compile();
-   rainbow->initializeProgram();
-   rainbow->addShader(rshader);
-   rainbow->addShader(fragmentShader);
-   rainbow->link();
-   rainbow->setUniformCallback("MVP", mvp);
-   Core::GraphicsComperand rCmp {rainbow, cmp.model};
-   m_registry.registerNewEntity(rCmp, Core::PositionComponent{{0, 0, 0}}, Core::ScaleComponent{{1, 1, 1}});
 }
 
 bool TestLayer2::onEvent(Core::Events::Event& event){

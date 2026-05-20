@@ -1,6 +1,7 @@
 #pragma once
 #include "Core_Utils/Linear/Vector.h"
 #include "Core_ECS/SortedRegistry.h"
+#include "Core_Utils/Types.h"
 #include <functional>
 
 namespace Core{
@@ -33,10 +34,7 @@ namespace Core{
    using PositionComponent = Component<Linear::fvec3, PositionTag>;
    using DirectionComponent = Component<Linear::fvec3, DirectionTag>;
    using ScaleComponent = Component<Linear::fvec3, ScaleTag>;
-   using ColorComponent = Component<Linear::fvec3, ColorTag>; // TODO: openGL takes colors from 0 to 1. 
-                                                              // Might be a good idea to create an abstraction 
-                                                              // here for our own color type, and allow each 
-                                                              // specific implementation to do the conversion
+   using ColorComponent = Component<Color, ColorTag>;
 
    template<typename... Components>
    struct ComponentPack {};

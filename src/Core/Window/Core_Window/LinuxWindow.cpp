@@ -189,6 +189,14 @@ namespace Core{
       using namespace Events;
       switch(keySym){
          case(XK_Escape): return Key::ESCAPE;
+         case(XK_w):
+         case(XK_W): return Key::W;
+         case(XK_a):
+         case(XK_A): return Key::A;
+         case(XK_s):
+         case(XK_S): return Key::S;
+         case(XK_d):
+         case(XK_D): return Key::D;
          default: return Key::OTHER;
       }
    }
