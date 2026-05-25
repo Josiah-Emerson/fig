@@ -146,39 +146,11 @@ CameraRotateLayer::CameraRotateLayer()
 }
 
 bool CameraRotateLayer::onEvent(Core::Events::Event& event) {
-   if(event.type == Core::Events::Type::KEY_PRESS){
-      constexpr float SPEED { 0.5f };
-      switch(event.keyEvent.key){
-         case(Core::Events::Key::W):
-         {
-            m_camera.pos()[2] -= SPEED;
-            return true;
-         }
-         case(Core::Events::Key::A):
-         {
-            m_camera.pos()[0] -= SPEED;
-            return true;
-         }
-         case(Core::Events::Key::S):
-         {
-            m_camera.pos()[2] += SPEED;
-            return true;
-         }
-         case(Core::Events::Key::D):
-         {
-            m_camera.pos()[0] += SPEED;
-            return true;
-         }
-         default:
-            break;
-      }
-   }
    return false;
 }
 
-void CameraRotateLayer::onUpdate(){
-   auto posPool = m_graphicsRegistry.getPool<Core::PositionComponent>();
-
+void CameraRotateLayer::onUpdate(float dt){
+   moveCamera(dt);
    m_imGuiPropertyEditor->draw();
 }
 
@@ -191,6 +163,23 @@ void CameraRotateLayer::onRender(){
  * PRIVATE METHOD IMPL 
  *
  */
+
+void CameraRotateLayer::moveCamera(float dt){
+   constexpr float speed = 0.000000005f;
+
+   if(m_window->isKeyDown(Core::Events::Key::SHIFT_L))
+      m_camera.pos()[1] -= dt * speed;
+   if(m_window->isKeyDown(Core::Events::Key::SPACE))
+      m_camera.pos()[1] += dt * speed;
+   if(m_window->isKeyDown(Core::Events::Key::W))
+      m_camera.pos()[2] -= dt * speed;
+   if(m_window->isKeyDown(Core::Events::Key::A))
+      m_camera.pos()[0] -= dt * speed;
+   if(m_window->isKeyDown(Core::Events::Key::S))
+      m_camera.pos()[2] += dt * speed;
+   if(m_window->isKeyDown(Core::Events::Key::D))
+      m_camera.pos()[0] += dt * speed;
+}
 
 std::shared_ptr<Core::Shader> CameraRotateLayer::createShader(const char* path, Core::ShaderType type){
    std::shared_ptr<Core::Shader> shader = m_renderDevice->createShader(path, type);

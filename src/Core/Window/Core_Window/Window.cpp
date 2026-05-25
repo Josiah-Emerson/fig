@@ -14,6 +14,10 @@ namespace Core{
       : m_windowSpec { spec }
    { }
 
+   bool Window::isKeyDown(Events::Key key) const{
+      return m_keyState[static_cast<std::size_t>(key)];
+   }
+
    std::shared_ptr<Window> Window::createWindow(const WindowSpec& spec ){
       std::shared_ptr<Window> ret = nullptr;
 

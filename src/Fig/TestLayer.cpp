@@ -242,7 +242,7 @@ TestLayer::TestLayer()
 
 
 bool TestLayer::onEvent(Core::Events::Event& event) { return false; }
-void TestLayer::onUpdate() { 
+void TestLayer::onUpdate(float dt) { 
    m_camera.pos() = m_camera.pos() + Core::Linear::fvec3{0, 0, 0.1};
 }
 void TestLayer::onRender() { 

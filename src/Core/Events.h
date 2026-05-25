@@ -18,6 +18,8 @@ namespace Core{
 
       enum class Key{
          ESCAPE,
+         SHIFT_L,
+         SPACE,
          W,
          A,
          S,

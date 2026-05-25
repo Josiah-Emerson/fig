@@ -16,6 +16,14 @@ namespace Core{
       std::function<void(Core::Events::Event& event)> eventCallback; 
    };
 
+   // TODO: Probably keep this setup, but for now Events are sent everytime theres an event 
+   // Furthermore, for key presses, the Window implementation should send an event, and also 
+   // set an array of bools which layers can use to check if that button is pressed. For the X 
+   // windowing system this makes sense because button presses come in events. As for Windows/Mac 
+   // I am not sure if it is events or its interface uses a polling system for checking which keys 
+   // are pressed. If for example, Windows doesn't 'send and event' if a key is pressed, there will 
+   // likely need to be extra logic for that impl to then send an event when that key is pressed
+
    class Window{
       public: 
          Window(const WindowSpec& spec = WindowSpec());
@@ -34,6 +42,8 @@ namespace Core{
          // returns nullptr if address not found
          // NOTE: This may be deeply coupled to openGL loading functions but for now oh well
          virtual void (*getProcAddress(char* procName)) () = 0;
+
+         bool isKeyDown(Events::Key key) const;
 
          // does ifdefs to return proper platform window
          // returns nullptr if nothing
@@ -59,6 +69,7 @@ namespace Core{
 
       protected: 
          WindowSpec m_windowSpec;
+         bool m_keyState[static_cast<std::size_t>(Events::Key::OTHER) + 1] { false };
    };
 
 } // namespace Core

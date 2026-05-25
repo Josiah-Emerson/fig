@@ -10,7 +10,7 @@ class TestLayer : public Core::Layer {
    public: 
       TestLayer();
       bool onEvent(Core::Events::Event& event) override;
-      void onUpdate() override;
+      void onUpdate(float dt) override;
       void onRender() override;
 
    private: 

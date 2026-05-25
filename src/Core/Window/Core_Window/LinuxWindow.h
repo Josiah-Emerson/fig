@@ -20,6 +20,7 @@ namespace Core{
          // NOTE: delete[] out_events because out_events is dynamically allocated on heap
          std::vector<Events::Event> translateXEventToFigEvents(XEvent* event);
          Events::Key translateXKeyToFigKey(XKeyEvent* keyEvent);
+         void updateKeyState(const Events::KeyEvent& keyEvent);
          void initImGui() override;
 
       private:

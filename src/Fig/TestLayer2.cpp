@@ -171,7 +171,7 @@ bool TestLayer2::onEvent(Core::Events::Event& event){
    return false;
 }
 
-void TestLayer2::onUpdate(){
+void TestLayer2::onUpdate(float dt){
    if(m_move){
       m_camera.pos() = m_camera.pos() + Core::Linear::fvec3{{0, 0, 0.1f}};
    }

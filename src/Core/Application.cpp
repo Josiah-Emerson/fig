@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <chrono>
 #include <ranges>
 
 namespace Core{
@@ -22,6 +23,8 @@ namespace Core{
    void Application::run(){
       m_running = true;
 
+      auto lastTime = std::chrono::system_clock::now();
+      auto currentTime = lastTime;
       while(m_running){
          m_window->newImGuiFrame();
          m_window->pollEvents();
@@ -38,8 +41,13 @@ namespace Core{
          // TODO: if none of the first 2 are true, could profile to see how much quicker it is doing updates and render at same time
          // TODO: if 2 is true, and it is sufficiently quicker to update and render at same time,
          // could implement a way where if a layer does depend on a not yet updated layer for rendering, that layer's rendering only is delayed? but idk
+
+         lastTime = currentTime;
+         currentTime = std::chrono::system_clock::now(); // TODO: are we fine with this outside of the loop
+                                                         // or do we want to update current within the loop?
+         float dt = (currentTime - lastTime).count();
          for(const std::unique_ptr<Layer>& layer: m_layerStack){
-            layer->onUpdate();
+            layer->onUpdate(dt);
          }
 
          // We should render in reverse? So that way the more 'background' layers are drawn first, and don't draw over more foreground?

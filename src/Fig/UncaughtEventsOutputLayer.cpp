@@ -34,7 +34,7 @@ bool UncaughtEventsOutputLayer::onEvent(Core::Events::Event& event) {
    return true;
 }
 
-void UncaughtEventsOutputLayer::onUpdate(){
+void UncaughtEventsOutputLayer::onUpdate(float dt){
    if(m_open)
       m_imGuiPropertyEditor->draw();
 }

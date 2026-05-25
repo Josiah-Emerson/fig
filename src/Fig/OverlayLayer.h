@@ -7,7 +7,7 @@ class OverlayLayer : public Core::Layer{
       OverlayLayer() = default;
 
       bool onEvent(Core::Events::Event& event) override;
-      void onUpdate() override { }
+      void onUpdate(float dt) override { }
       void onRender() override {}
 
 };

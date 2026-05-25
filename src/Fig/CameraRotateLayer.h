@@ -26,7 +26,7 @@ class CameraRotateLayer : public Core::Layer{
    public: 
       CameraRotateLayer();
       bool onEvent(Core::Events::Event& event) override; 
-      void onUpdate() override;
+      void onUpdate(float dt) override;
       void onRender() override;
 
    private: 
@@ -117,6 +117,7 @@ class CameraRotateLayer : public Core::Layer{
       };
 
    private: 
+      void moveCamera(float dt);
       std::shared_ptr<Core::Shader> createShader(const char* path, Core::ShaderType type);
       std::shared_ptr<Core::ShaderProgram> createShaderProgram(std::shared_ptr<Core::Shader> vertex, 
                                                                std::shared_ptr<Core::Shader> fragment);

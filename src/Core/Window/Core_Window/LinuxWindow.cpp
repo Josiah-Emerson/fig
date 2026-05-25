@@ -2,6 +2,7 @@
 #include <GL/glx.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
@@ -90,6 +91,9 @@ namespace Core{
          std::vector<Events::Event> events = translateXEventToFigEvents(&event);
 
          for(Events::Event& e : events){
+            if(e.type == Events::Type::KEY_PRESS || e.type == Events::Type::KEY_RELEASE)
+               updateKeyState(e.keyEvent);
+
             raiseEvent(e);
          }
       }
@@ -189,6 +193,8 @@ namespace Core{
       using namespace Events;
       switch(keySym){
          case(XK_Escape): return Key::ESCAPE;
+         case(XK_Shift_L): return Key::SHIFT_L;
+         case(XK_space): return Key::SPACE;
          case(XK_w):
          case(XK_W): return Key::W;
          case(XK_a):
@@ -201,6 +207,13 @@ namespace Core{
       }
    }
 
+   void LinuxWindow::updateKeyState(const Events::KeyEvent& keyEvent){
+      if(keyEvent.type == Events::KEY_PRESS){
+         m_keyState[static_cast<std::size_t>(keyEvent.key)] = true;
+      } else{
+         m_keyState[static_cast<std::size_t>(keyEvent.key)] = false;
+      }
+   }
 
    // TODO: If more complicated and need multiple different contexts, may need to move imgui from being a window controlled thing
    void LinuxWindow::initImGui(){
