@@ -10,8 +10,6 @@ add_executable(${project})
 target_sources(${project} PRIVATE
    CameraRotateLayer.cpp
    OverlayLayer.cpp
-   TestLayer.cpp
-   # TestLayer2.cpp
    UncaughtEventsOutputLayer.cpp
    main.cpp
 )

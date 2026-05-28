@@ -24,7 +24,7 @@ namespace Core{
          }
 
       protected: 
-         std::shared_ptr<const Window> m_window;
+         std::shared_ptr<Window> m_window;
 
       private: 
          void queueTransition(std::unique_ptr<Layer> layer);

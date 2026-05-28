@@ -18,6 +18,15 @@ namespace Core{
       return m_keyState[static_cast<std::size_t>(key)];
    }
 
+   const Window::PointerPosition& Window::pointerPosition() const {
+      return m_pointerPosition;
+   }
+
+   void Window::setPointerPosition(PointerPosition newPos){
+      internalSetPointerPosition(newPos);
+      m_pointerPosition = newPos;
+   }
+
    std::shared_ptr<Window> Window::createWindow(const WindowSpec& spec ){
       std::shared_ptr<Window> ret = nullptr;
 

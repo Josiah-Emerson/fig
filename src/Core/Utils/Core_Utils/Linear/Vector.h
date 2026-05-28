@@ -140,6 +140,11 @@ namespace Core{
       requires(Concepts::numeric<T, U>)
       retType dotProduct(const Vector<T, N>& a, const Vector<U, N>& b);
 
+      // returns angle between two vectors. 
+      // when rads is true, the angle is in radians, and degrees when false
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T, U>)
+      float angleBetweenVectors(const Vector<T, N>& a, const Vector<U, N>& b, bool rads = false);
       /*
        *
        * VECTOR CLASS IMPLEMENTATION
@@ -384,6 +389,18 @@ namespace Core{
          }
 
          return res;
+      }
+
+      // forward declaration 
+      template<typename T, typename U> requires(Concepts::numeric<T>)
+      U radToDeg(T);
+
+      // NOTE: rads is default arg
+      template<typename T, typename U, std::size_t N>
+      requires(Concepts::numeric<T, U>)
+      float angleBetweenVectors(const Vector<T, N>& a, const Vector<U, N>& b, bool rads){
+         float theta = std::acos( (dotProduct(a, b)) / (a.magnitude() * b.magnitude()) );
+         return (rads ? theta : radToDeg<float, float>(theta));
       }
 
    } // namespace Linear
