@@ -1,4 +1,5 @@
 #include "UncaughtEventsOutputLayer.h"
+#include "Events.h"
 #include <GL/gl.h>
 
 UncaughtEventsOutputLayer::UncaughtEventsOutputLayer()

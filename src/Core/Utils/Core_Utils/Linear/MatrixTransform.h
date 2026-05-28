@@ -21,14 +21,14 @@ namespace Core{
       requires(Concepts::numeric<T>)
       Matrix<T, M, M> getIdentityMatrix();
 
-      // TODO: Implement direction vector and test any other scale than 1. Note when implenting d, need to uncomment V2 at all spots
       // Creates a Matrix which can transform a vector in model coordinates to world coordinates
       // p is the center of the model in world coordinates
-      // d is the direction the model is facing in world coordinates 
+      // d is the direction the model is facing in world coordinates, angles around x, y, and z axes
       // s represents how much to scale the model by
-      template<typename V1, /*typename V2,*/ typename V3, typename Mat = Concepts::float_promotion_t<V1, /*V2,*/ V3>>
-      requires(Concepts::numeric<V1, /*V2,*/ V3>)
-      Matrix<Mat, 4, 4> modelMatrix(const Vector<V1, 3>& p, /*const Vector<V2, 3>& d,*/ const Vector<V3, 3>& s);
+      template<typename V1, typename V2, typename V3, typename Mat = Concepts::float_promotion_t<V1, /*V2,*/ V3>>
+      requires(Concepts::numeric<V1, V2, V3>)
+      Matrix<Mat, 4, 4> modelMatrix(const Vector<V1, 3>& p, const Vector<V2, 3>& d, const Vector<V3, 3>& s);
+
 
       // Creates a matrix which transforms a vector in world coordinates to a coordinate system where the +z axis 
       // is the unit vector from point lookAt to point pos (i.e. the correct direction for openGL if you wanted to look at point lookAt),
@@ -47,6 +47,9 @@ namespace Core{
       // TODO: when a reason for another math-like file happens, should maybe move this to that
       template<typename T, typename U = Concepts::float_promotion_t<T>> requires(Concepts::numeric<T>)
       U degToRad(T val);
+
+      template<typename T, typename U = Concepts::float_promotion_t<T>> requires(Concepts::numeric<T>)
+      U radToDeg(T val);
 
       /*
        *
@@ -67,12 +70,35 @@ namespace Core{
 
       // TODO: See note below. check if possible and if so add something to ensure this doesn't happen
       // NOTE: Mat is a default type. One issue might be if a user defines Mat as something like int.
-      template<typename V1, /*typename V2,*/ typename V3, typename Mat>
-      requires(Concepts::numeric<V1, /*V2,*/ V3>)
-      Matrix<Mat, 4, 4> modelMatrix(const Vector<V1, 3>& p, /*const Vector<V2, 3>& d,*/ const Vector<V3, 3>& s){
+      template<typename V1, typename V2, typename V3, typename Mat>
+      requires(Concepts::numeric<V1, V2, V3>)
+      Matrix<Mat, 4, 4> modelMatrix(const Vector<V1, 3>& p, const Vector<V2, 3>& d, const Vector<V3, 3>& s){
+         // TODO: For now do rotation with euler angles but probably better to move to quaternions 
+         // surely this won't be an issue for a little bit... Surely... 
+         
+         // The algorithm for building the Rotation matrix from d is from: 
+         // https://www.opengl-tutorial.org/assets/faq_quaternions/index.html#Q36
+         /*
+            R = 
+               |  CE     -CF      D  0 |
+               |  HE+AF  -HF+AE  -BC 0 |
+               | -GE+BF   GF+BE   AC 0 |
+               |  0       0       0  1 |
+
+               where, 
+               A = cos(x)
+               B = sin(x)
+               C = cos(y)
+               D = sin(y)
+               E = cos(z)
+               F = sin(z)
+               G = A*D 
+               H = B*D
+          */
+
          /*
             Worked out on paper, where posVec has world positions (x, y,z ), dirVec (soon to be rotation TBD), and scaleVec has scale:
-            M = T * R * S, where T is translation matrix, S is rotation matrix, and S is scale matrix
+            M = T * R * S, where T is translation matrix, R is rotation matrix, and S is scale matrix
             A = R * S -> For now, no rotation, so R is I which means A is S
             M = T * A  -> M = T * S (see above)
             worked out: 
@@ -82,19 +108,45 @@ namespace Core{
                | 0  0  Sz Tz |
                | 0  0  0  1  | 
           */
-         auto res = getIdentityMatrix<Mat, 4>();
 
-         // Row 1
-         res.at(0, 0) = s[0];
-         res.at(0, 3) = p[0];
+         // convert to rad 
+         const auto X_ROT = degToRad(d[0]);
+         const auto Y_ROT = degToRad(d[1]);
+         const auto Z_ROT = degToRad(d[2]);
 
-         // Row 2
-         res.at(1, 1) = s[1];
-         res.at(1, 3) = p[1];
-         
-         // Row 3
-         res.at(2, 2) = s[2];
-         res.at(2, 3) = p[2];
+         const float A = std::cos(X_ROT);
+         const float B = std::sin(X_ROT);
+         const float C = std::cos(Y_ROT);
+         const float D = std::sin(Y_ROT);
+         const float E = std::cos(Z_ROT);
+         const float F = std::sin(Z_ROT);
+         const float G = A * D;
+         const float H = B * D;
+
+         Matrix<Mat, 4, 4> R {
+            {(C*E),        -(C*F),          D,    0},
+            {(H*E)+(A*F),   (-H*F)+(A*E), -(B*C), 0},
+            {(-G*E)+(B*F),  (G*F)+(B*E),   (A*C), 0},
+            {  0,            0,             0,    1}
+         };
+
+         Matrix<Mat, 4, 4> T{
+            {1, 0, 0, p[0]},
+            {0, 1, 0, p[1]},
+            {0, 0, 1, p[2]},
+            {0, 0, 0,   1 },
+         };
+
+         Matrix<Mat, 4, 4> S{
+            {s[0], 0, 0, 0},
+            {0, s[1], 0, 0},
+            {0, 0, s[2], 0},
+            {0, 0,   0,  1},
+         };
+
+         // TODO: workout on paper for faster calculations 
+
+         auto res = T * R * S;
 
          return res;
          
@@ -166,6 +218,11 @@ namespace Core{
       template<typename T, typename U> requires(Concepts::numeric<T>)
       U degToRad(T val){
          return val * (M_PI / 180);
+      }
+
+      template<typename T, typename U> requires(Concepts::numeric<T>)
+      U radToDeg(T val){
+         return val * (180 / M_PI);
       }
 
    } // namespace Linear

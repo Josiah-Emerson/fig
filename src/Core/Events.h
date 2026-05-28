@@ -20,6 +20,7 @@ namespace Core{
          ESCAPE,
          SHIFT_L,
          SPACE,
+         TAB,
          W,
          A,
          S,
@@ -42,6 +43,7 @@ namespace Core{
 
       struct MouseMotionEvent{
          Type type { MOUSE_MOVEMENT }; // MOUSE_MOVEMENT
+         float x, y;
       };
 
       struct WindowChangeEvent{

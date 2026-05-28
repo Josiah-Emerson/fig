@@ -11,8 +11,6 @@ bool OverlayLayer::onEvent(Core::Events::Event& event){
             Core::Application::get().stop();
             return true;
          }
-
-         break;
       default:
          break;
    }

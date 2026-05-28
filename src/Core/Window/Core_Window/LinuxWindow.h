@@ -21,7 +21,9 @@ namespace Core{
          std::vector<Events::Event> translateXEventToFigEvents(XEvent* event);
          Events::Key translateXKeyToFigKey(XKeyEvent* keyEvent);
          void updateKeyState(const Events::KeyEvent& keyEvent);
+         void updatePointerPosition(float x, float y);
          void initImGui() override;
+         void internalSetPointerPosition(Window::PointerPosition newPos) override;
 
       private:
          Display* m_XDisplay;

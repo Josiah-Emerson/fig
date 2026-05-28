@@ -94,6 +94,10 @@ namespace Core{
             if(e.type == Events::Type::KEY_PRESS || e.type == Events::Type::KEY_RELEASE)
                updateKeyState(e.keyEvent);
 
+            if(e.type == Events::Type::MOUSE_MOVEMENT){
+               updatePointerPosition(e.mouseMotionEvent.x, e.mouseMotionEvent.y);
+            }
+
             raiseEvent(e);
          }
       }
@@ -141,6 +145,11 @@ namespace Core{
             break;
          case(MotionNotify):
             figEvent.type = Events::MOUSE_MOVEMENT;
+            // TODO: This was implemented in about 5 seconds, 
+            // look at docs for X system to make sure that 
+            // this right and only needs to go here
+            figEvent.mouseMotionEvent.x = event->xmotion.x;
+            figEvent.mouseMotionEvent.y = event->xmotion.y;
             events.push_back(figEvent);
             break;
          default: 
@@ -195,6 +204,7 @@ namespace Core{
          case(XK_Escape): return Key::ESCAPE;
          case(XK_Shift_L): return Key::SHIFT_L;
          case(XK_space): return Key::SPACE;
+         case(XK_Tab): return Key::TAB;
          case(XK_w):
          case(XK_W): return Key::W;
          case(XK_a):
@@ -215,6 +225,11 @@ namespace Core{
       }
    }
 
+   void LinuxWindow::updatePointerPosition(float x, float y){
+      m_pointerPosition.x = x;
+      m_pointerPosition.y = y;
+   }
+
    // TODO: If more complicated and need multiple different contexts, may need to move imgui from being a window controlled thing
    void LinuxWindow::initImGui(){
       IMGUI_CHECKVERSION();
@@ -225,6 +240,12 @@ namespace Core{
 
       ImGui_ImplX11_InitForOpenGL(m_XDisplay, &m_XWindow);
       ImGui_ImplOpenGL3_Init();
+   }
+
+   void LinuxWindow::internalSetPointerPosition(Window::PointerPosition newPos){
+      XWarpPointer(m_XDisplay, None, m_XWindow, 
+                   0, 0, 0, 0,
+                   newPos.x, newPos.y);
    }
 
 } // namespace Core

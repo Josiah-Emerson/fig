@@ -23,9 +23,14 @@ namespace Core{
    // I am not sure if it is events or its interface uses a polling system for checking which keys 
    // are pressed. If for example, Windows doesn't 'send and event' if a key is pressed, there will 
    // likely need to be extra logic for that impl to then send an event when that key is pressed
+   // TODO: similar to above, the impl needs to set and update the m_pointerPosition. Not sure if 
+   // this is best approach or what
 
    class Window{
       public: 
+         // Upper left is (0, 0) and increases down
+         struct PointerPosition { float x, y; };
+
          Window(const WindowSpec& spec = WindowSpec());
          virtual ~Window() = default;
 
@@ -37,6 +42,9 @@ namespace Core{
          virtual void newImGuiFrame() = 0;
          virtual int getWidth() { return m_windowSpec.width; }
          virtual int getHeight() { return m_windowSpec.height; }
+         
+         // TODO: add logic for ensuring new position works 
+         virtual void setPointerPosition(PointerPosition newPos);
 
          // return procedure address of a specified procedure
          // returns nullptr if address not found
@@ -44,6 +52,7 @@ namespace Core{
          virtual void (*getProcAddress(char* procName)) () = 0;
 
          bool isKeyDown(Events::Key key) const;
+         const PointerPosition& pointerPosition() const;
 
          // does ifdefs to return proper platform window
          // returns nullptr if nothing
@@ -67,9 +76,12 @@ namespace Core{
             m_windowSpec.height = height; 
          }
 
+         virtual void internalSetPointerPosition(PointerPosition newPos) = 0;
+
       protected: 
          WindowSpec m_windowSpec;
          bool m_keyState[static_cast<std::size_t>(Events::Key::OTHER) + 1] { false };
+         PointerPosition m_pointerPosition;
    };
 
 } // namespace Core

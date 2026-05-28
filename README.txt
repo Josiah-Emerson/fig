@@ -3,6 +3,7 @@ Things to think about:
    2) Will probably need to think about refactoring so that all the components go in their own place, 
    and then the Graphics specific ComponentPack is defined somewhere else? Just doesn't seem the best rn
 
+TODO: Do some stuff in Camera class with LOCKED vs DIRECTIONAL
 TODO: Add testing capabilities for different classes
 
 TODO: Implementing GLShaderProgram. Make it so that it can take a GLShader shared pointer as an argument (probalby a virtual func) to attach. 
@@ -66,3 +67,6 @@ DEV DEPENDENCIES:
    'xorg-dev' provides glx bindings
 - For testing, need to clone Catch2 locally (at least until I figure out the submodule)
    - Catch2 is ignored for now in .gitignore
+
+HELP STUFF:
+ - If pointer stops moving when a key is down, there is likely a 'disable touchpad while typing' setting on 
