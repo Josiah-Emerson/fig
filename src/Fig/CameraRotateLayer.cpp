@@ -197,12 +197,8 @@ void CameraRotateLayer::moveCamera(float dt){
       float yOffset = (center.y - current.y) * lookSpeed;
 
       if(xOffset != 0 || yOffset != 0){
-         std::cout << "xOffset: " << xOffset << '\n';
-         std::cout << "yOffset: " << yOffset << '\n';
-
          m_camera.updateLookWithOffset({0, -yOffset, -xOffset});
          m_window->setPointerPosition(center);
-
       }
    }
 

@@ -12,7 +12,9 @@ namespace Core{
    class ImGuiPropertyEditor : public ImGuiContainer {
       public: 
          struct DataNode;
-         ImGuiPropertyEditor(const DataNode* const rootNode, bool* const p_open = nullptr);
+         ImGuiPropertyEditor(Settings containerSettings, 
+               const DataNode* const rootNode, 
+               bool* const p_open = nullptr);
          ~ImGuiPropertyEditor();
          // TODO: Big 5
 
