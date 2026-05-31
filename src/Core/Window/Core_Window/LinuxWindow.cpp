@@ -15,7 +15,7 @@ namespace Core{
    LinuxWindow::LinuxWindow(const WindowSpec& spec )
       : Window { spec }
    {
-      m_XDisplay = XOpenDisplay(NULL);
+      m_linuxImplementationDetails.m_XDisplay = XOpenDisplay(NULL);
 
       // TODO: More flexible way to choose options (i.e. if these aren't available)
       int glxfbAttributeList[] = {GLX_DOUBLEBUFFER, True,
@@ -28,11 +28,14 @@ namespace Core{
                                  GLX_DEPTH_SIZE, 24,
                                  None};
       int numElements;
-      GLXFBConfig* glxfbConfig = glXChooseFBConfig(m_XDisplay, XDefaultScreen(m_XDisplay), glxfbAttributeList, &numElements);
+      GLXFBConfig* glxfbConfig = glXChooseFBConfig(m_linuxImplementationDetails.m_XDisplay, 
+            XDefaultScreen(m_linuxImplementationDetails.m_XDisplay), 
+            glxfbAttributeList, &numElements);
       // TODO: is throwin an error best way for this? init func returning bool better? idk
       if(!glxfbConfig)
          throw std::runtime_error("Error choosing framebuffer config for GLX in LinuxWindow constructor.");
-      XVisualInfo* vInfo = glXGetVisualFromFBConfig(m_XDisplay, glxfbConfig[0]);
+      XVisualInfo* vInfo = glXGetVisualFromFBConfig(m_linuxImplementationDetails.m_XDisplay, 
+            glxfbConfig[0]);
 
       XSetWindowAttributes setWindowAttributes { };
       // TODO: I think comment in IMGUI x11 implementation, but these are all needed for IMGUI to work, 
@@ -42,25 +45,31 @@ namespace Core{
                                        KeyPressMask | KeyReleaseMask |
                                        StructureNotifyMask | PointerMotionMask | 
                                        EnterWindowMask | LeaveWindowMask;
-      setWindowAttributes.colormap = XCreateColormap(m_XDisplay, RootWindow(m_XDisplay, vInfo->screen), vInfo->visual, AllocNone);
+      setWindowAttributes.colormap = XCreateColormap(m_linuxImplementationDetails.m_XDisplay, 
+            RootWindow(m_linuxImplementationDetails.m_XDisplay, vInfo->screen), 
+            vInfo->visual, AllocNone);
 
-      m_XWindow = XCreateWindow(m_XDisplay, RootWindow(m_XDisplay, vInfo->screen), 
+      m_linuxImplementationDetails.m_XWindow = XCreateWindow(m_linuxImplementationDetails.m_XDisplay, 
+            RootWindow(m_linuxImplementationDetails.m_XDisplay, vInfo->screen), 
             spec.x, spec.y, spec.width, spec.height, 0, vInfo->depth, InputOutput, 
             vInfo->visual, CWEventMask | CWColormap, &setWindowAttributes);
 
-      XMapWindow(m_XDisplay, m_XWindow);
+      XMapWindow(m_linuxImplementationDetails.m_XDisplay, m_linuxImplementationDetails.m_XWindow);
 
-      m_glxWindow = glXCreateWindow(m_XDisplay, glxfbConfig[0], m_XWindow, NULL);
-      m_glxContext = glXCreateNewContext(m_XDisplay, glxfbConfig[0], GLX_RGBA_TYPE, NULL, True);
-      if(!glXMakeContextCurrent(m_XDisplay, m_glxWindow, m_glxWindow, m_glxContext))
+      m_glxWindow = glXCreateWindow(m_linuxImplementationDetails.m_XDisplay, glxfbConfig[0], 
+            m_linuxImplementationDetails.m_XWindow, NULL);
+      m_glxContext = glXCreateNewContext(m_linuxImplementationDetails.m_XDisplay, 
+            glxfbConfig[0], GLX_RGBA_TYPE, NULL, True);
+      if(!glXMakeContextCurrent(m_linuxImplementationDetails.m_XDisplay, 
+               m_glxWindow, m_glxWindow, m_glxContext))
          throw std::runtime_error("Error making m_glxContext current in LinuxWindow constructor");
 
       // TODO: Where should we put ImGui stuff?
    }
 
    LinuxWindow::~LinuxWindow(){
-      if(m_XDisplay)
-         XCloseDisplay(m_XDisplay);
+      if(m_linuxImplementationDetails.m_XDisplay)
+         XCloseDisplay(m_linuxImplementationDetails.m_XDisplay);
       // TODO: Anything else? Window should auto close?
    }
 
@@ -74,13 +83,13 @@ namespace Core{
          ImGui_ImplOpenGL3_RenderDrawData(imGuiDrawData);
       }
 
-      glXSwapBuffers(m_XDisplay, m_glxWindow);
+      glXSwapBuffers(m_linuxImplementationDetails.m_XDisplay, m_glxWindow);
    }
 
    void LinuxWindow::pollEvents(){
-      while(XPending(m_XDisplay) > 0){
+      while(XPending(m_linuxImplementationDetails.m_XDisplay) > 0){
          XEvent event {};
-         XNextEvent(m_XDisplay, &event);
+         XNextEvent(m_linuxImplementationDetails.m_XDisplay, &event);
          // TODO: The funky part here is that we need to be able to pass imgui the XEvent
          // Does it matter that we pass it here? Will layers be able to check if imgui wants it? What if imgui isn't init here?
          // Do we need to pass underlying XEvent as part of the Core::Events::Event? How would this work for other OS's which don't need it passed in automatically?
@@ -238,12 +247,14 @@ namespace Core{
       io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // ImGuiConfigFlags_NavEnableGamepad
       ImGui::StyleColorsDark();
 
-      ImGui_ImplX11_InitForOpenGL(m_XDisplay, &m_XWindow);
+      ImGui_ImplX11_InitForOpenGL(m_linuxImplementationDetails.m_XDisplay, 
+            &m_linuxImplementationDetails.m_XWindow);
       ImGui_ImplOpenGL3_Init();
    }
 
    void LinuxWindow::internalSetPointerPosition(Window::PointerPosition newPos){
-      XWarpPointer(m_XDisplay, None, m_XWindow, 
+      XWarpPointer(m_linuxImplementationDetails.m_XDisplay, None, 
+                   m_linuxImplementationDetails.m_XWindow, 
                    0, 0, 0, 0,
                    newPos.x, newPos.y);
    }

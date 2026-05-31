@@ -106,6 +106,9 @@ namespace Core{
        * COMMON TYPEDEFS
        *
        */
+      typedef Vector<int, 2> ivec2;
+      typedef Vector<float, 2> fvec2;
+      typedef Vector<double, 2> dvec2;
       typedef Vector<int, 3> ivec3;
       typedef Vector<float, 3> fvec3;
       typedef Vector<double, 3> dvec3;

@@ -3,6 +3,7 @@ Things to think about:
    2) Will probably need to think about refactoring so that all the components go in their own place, 
    and then the Graphics specific ComponentPack is defined somewhere else? Just doesn't seem the best rn
 
+TODO: There is a way to use our own math class with ImGui
 TODO: Do some stuff in Camera class with LOCKED vs DIRECTIONAL
 TODO: Add testing capabilities for different classes
 

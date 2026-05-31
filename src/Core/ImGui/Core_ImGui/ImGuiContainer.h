@@ -16,9 +16,8 @@ namespace Core{
          };
 
          // value of *p_open should be checked by caller. If false, do not call draw()
-         ImGuiContainer(Settings settings, bool* const p_open)
+         ImGuiContainer(bool* const p_open)
             : m_open { p_open }
-            , m_settings { settings }
          { }
          virtual ~ImGuiContainer() = default;
 
@@ -35,6 +34,5 @@ namespace Core{
          virtual void internalDraw() = 0;
       private: 
          bool* m_open;
-         Settings m_settings;
    };
 } // namespace Core
