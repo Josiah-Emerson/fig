@@ -6,11 +6,12 @@ namespace Core{
    void ImGuiContainer::draw(){
       // TODO: update with way to pass width/height from calling function
       const int WINDOW_WIDTH = Application::get().getWindow()->getWidth();
+      const int WINDOW_HEIGHT = Application::get().getWindow()->getHeight();
+      const int WIDTH = 400;
+      const int HEIGHT = WINDOW_HEIGHT / 2;
 
-      ImGui::SetNextWindowSize(ImVec2(m_settings.width, m_settings.height));
-      ImGui::SetNextWindowSize(ImVec2(
-               m_settings.leftJustify ? m_settings.x : WINDOW_WIDTH - m_settings.x,
-               m_settings.y ));
+      ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT));
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH - WIDTH, HEIGHT));
       if(ImGui::Begin("ImGui Container", m_open))
          internalDraw();
 
