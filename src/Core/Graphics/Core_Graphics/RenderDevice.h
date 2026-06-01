@@ -43,7 +43,8 @@ namespace Core{
                                                                            
          virtual void drawRegisteredEntities() = 0; // TBD: Args
                               
-         static std::shared_ptr<RenderDevice> createRenderDevice(const GraphicsRegistry& registry); // TBD: Any args
+         static std::unique_ptr<RenderDevice> createRenderDevice(const GraphicsRegistry& registry);
+         // static std::shared_ptr<RenderDevice> createRenderDevice(const GraphicsRegistry& registry); // TBD: Any args
 
       protected: 
          const GraphicsRegistry& m_registry;

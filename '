@@ -49,8 +49,8 @@ namespace Core{
                bool slider(
                      const char* label,
                      T& var,
-                     T min = std::numeric_limits<T>::min(),
-                     T max = std::numeric_limits<T>::max(),
+                     T min = std::numeric_limits<T>::min / 2,
+                     T max = std::numeric_limits<T>::max / 2,
                      bool sameLine = false
                   );
 

@@ -5,7 +5,7 @@
 namespace Core{
 
    // NOTE: mode is a default value
-   Camera::Camera(const Linear::fvec3& pos, float FOV, float height, float width, const Linear::fvec3& look, LookMode mode)
+   Camera::Camera(const Linear::fvec3& pos, float FOV, float width, float height, const Linear::fvec3& look, LookMode mode)
       : m_pos { pos }
       , m_FOV { FOV }
       , m_height { height }

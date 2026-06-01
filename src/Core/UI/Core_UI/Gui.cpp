@@ -33,6 +33,11 @@ namespace Core{
          bool addButton(const char* label, bool sameLine);
          bool addRGBSelector(const char* label, Linear::fvec3 color, bool sameLine);
 
+         bool addSliderHelper(const char* label, void* data, ImGuiDataType imguiType, void* min, void* max, bool sameLine);
+
+         template<typename T>
+         bool addSlider(const char* label, T& var, T min, T max, bool sameLine);
+
          void beginFrame();
          void renderDrawData();
 
@@ -120,6 +125,24 @@ namespace Core{
       return ImGui::ColorEdit3(label, &color[0]);
    }
 
+   bool GuiImpl::addSliderHelper(const char* label, void* data, ImGuiDataType imguiType, void* min, void* max, bool sameLine){
+      if(sameLine)
+         ImGui::SameLine();
+
+      return ImGui::DragScalar(label, imguiType, data, 1.f, min, max);
+   }
+
+   template<typename T>
+   bool GuiImpl::addSlider(const char* label, T& var, T min, T max, bool sameLine){
+      if constexpr (std::is_same_v<T, std::int32_t>){
+         return addSliderHelper(label, &var, ImGuiDataType_S32, &min, &max, sameLine);
+      } else if constexpr (std::is_same_v<T, float>){
+         return addSliderHelper(label, &var, ImGuiDataType_Float, &min, &max, sameLine);
+      } else {
+         static_assert(!sizeof(T), "Data type not supported");
+      }
+   }
+
    void GuiImpl::beginFrame(){
       // TODO: Do we need to set the current context ?
       ImGui::SetCurrentContext(m_imGuiContext);
@@ -161,6 +184,18 @@ namespace Core{
    bool Gui::Widgets::rgbSelector(const char* label, Linear::fvec3 color, bool sameLine){
       return m_gui && m_gui->m_impl->addRGBSelector(label, color, sameLine);
    }
+
+   template<typename T>
+   bool Gui::Widgets::slider(const char* label, T& var, T min, T max, bool sameLine){
+      return m_gui && m_gui->m_impl->addSlider(label, var, min, max, sameLine);
+   }
+
+#define ADD_SLIDER_TYPE(Type) \
+   template bool Gui::Widgets::slider<Type>(const char*, Type&, Type, Type, bool);
+
+   ADD_SLIDER_TYPE(std::int32_t);
+   ADD_SLIDER_TYPE(float);
+#undef ADD_SLIDER_TYPE
 
    Gui::Group::Group(Gui* gui, std::string_view label, bool beginExpanded){
       assert(false && "Not implemented yet");

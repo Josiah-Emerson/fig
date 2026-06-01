@@ -28,14 +28,14 @@ namespace Core{
       : m_registry { registry }
    { }
 
-   std::shared_ptr<RenderDevice> RenderDevice::createRenderDevice(const GraphicsRegistry& registry){
-      std::shared_ptr<RenderDevice> ret = nullptr;
+   std::unique_ptr<RenderDevice> RenderDevice::createRenderDevice(const GraphicsRegistry& registry){
+      std::unique_ptr<RenderDevice> ret = nullptr;
 
       // TODO: Other graphics when ready
 #if defined(OPENGL)
-      ret = std::make_shared<GLRenderDevice>(registry);
+      ret = std::make_unique<GLRenderDevice>(registry);
 #endif
 
-      return ret;
+      return std::move(ret);
    }
 } // namespace Core
