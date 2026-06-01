@@ -69,8 +69,37 @@ namespace Core{
             void release();
          };
 
+         class Window : public Widgets{
+            public:
+            Window(Gui* gui, 
+                  const char* name, 
+                  bool& open,
+                  Linear::ivec2 size, 
+                  Linear::ivec2 pos = {0, 0}, 
+                  WindowFlags flags = WindowFlags_None);
+            ~Window();
+
+            /*
+             * End Window 
+             */
+            void release();
+
+            // TODO: columns within 
+            // TODO: Sizing 
+         };
+
          Gui();
          ~Gui(); 
+
+         /*
+          * Begins the UI frame. Must be called at the start of each frame 
+          */
+         void beginFrame();
+
+         /*
+          * Renders the UI, and ends the ImGui frame 
+          */
+         void render();
 
       private: 
          std::unique_ptr<GuiImpl> m_impl;

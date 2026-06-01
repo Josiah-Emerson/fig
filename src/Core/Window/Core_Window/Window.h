@@ -37,9 +37,9 @@ namespace Core{
          // virtual void create(); // TODO: most of it is done in constructor
          // virtual void destroy(); // TODO: done by destructor?
          virtual void update() = 0; // swapBuffers
+         virtual void prepareNewFrame() = 0; // clear color (probably should not go here...)
          virtual void pollEvents() = 0; // For now this should be common window function regardless of OS
          virtual void raiseEvent(Core::Events::Event& event) = 0;
-         virtual void newImGuiFrame() = 0;
          virtual void* getImplementationSpecificDetails() = 0;
          virtual int getWidth() { return m_windowSpec.width; }
          virtual int getHeight() { return m_windowSpec.height; }
@@ -66,7 +66,6 @@ namespace Core{
          // getHandle(); 
 
       protected: 
-         virtual void initImGui() = 0;
          virtual void updatePosition(int x, int y) { 
             m_windowSpec.x = x; 
             m_windowSpec.y = y; 

@@ -11,5 +11,5 @@ class GuiTestLayer : public Core::Layer {
       void onRender() override;
 
    private: 
-      std::unique_ptr<Core::Gui> m_gui;
+      Core::Gui m_gui;
 };

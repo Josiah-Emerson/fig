@@ -15,9 +15,9 @@ namespace Core{
          ~LinuxWindow();
 
          void update() override; // swapBuffers
+         void prepareNewFrame() override;
          void pollEvents() override;
          void raiseEvent(Events::Event& event) override; // TODO: why public?
-         void newImGuiFrame() override;
          void* getImplementationSpecificDetails() override { return &m_linuxImplementationDetails; }
          void (*getProcAddress(char* procName)) () override;
 
@@ -28,7 +28,6 @@ namespace Core{
          Events::Key translateXKeyToFigKey(XKeyEvent* keyEvent);
          void updateKeyState(const Events::KeyEvent& keyEvent);
          void updatePointerPosition(float x, float y);
-         void initImGui() override;
          void internalSetPointerPosition(Window::PointerPosition newPos) override;
 
       private:

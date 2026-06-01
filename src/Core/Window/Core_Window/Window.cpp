@@ -36,7 +36,6 @@ namespace Core{
       ret = std::make_shared<LinuxWindow>(spec);
 #elif defined(OSX)
 #endif
-      ret->initImGui(); // NOTE: If this gets moved from here, need to think about where to put it otherwise there will likely be calls to an unitialized imgui (for example in raise event)
       return ret;
    }
 } // namespace Core

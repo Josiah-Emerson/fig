@@ -1,15 +1,19 @@
 #include "GuiTestLayer.h"
-#include <memory>
 
-GuiTestLayer::GuiTestLayer(){
-   m_gui = std::make_unique<Core::Gui>();
-}
+GuiTestLayer::GuiTestLayer()
+   : m_gui { }
+{}
 GuiTestLayer::~GuiTestLayer() = default;
 
 void GuiTestLayer::onUpdate(float dt){
-   std::cout << "GuiTestLayer::onUpdate\n";
 }
 
 void GuiTestLayer::onRender(){
-   std::cout << "GuiTestLayer::onRender\n";
+   static bool open = true;
+   m_gui.beginFrame();
+   if(open){
+      Core::Gui::Window window {&m_gui, "Hello, World!", open, {200, 400}, {0,0}};
+      window.text("Hello!");
+   }
+   m_gui.render();
 }

@@ -1,4 +1,5 @@
 #include "LinuxWindow.h"
+#include <GL/gl.h>
 #include <GL/glx.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -76,17 +77,16 @@ namespace Core{
 
 
    void LinuxWindow::update(){
-      // TODO: Should ImGui::Render() be here?
-      ImGui::Render();
-      ImDrawData* imGuiDrawData = ImGui::GetDrawData();
-      if(imGuiDrawData){
-         ImGui_ImplOpenGL3_RenderDrawData(imGuiDrawData);
-      }
-
       glXSwapBuffers(m_linuxImplementationDetails.m_XDisplay, m_glxWindow);
    }
 
+   void LinuxWindow::prepareNewFrame(){
+      glClearColor(0, 0, 0, 0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   }
+
    void LinuxWindow::pollEvents(){
+      // TODO: Decouple from ImGui
       while(XPending(m_linuxImplementationDetails.m_XDisplay) > 0){
          XEvent event {};
          XNextEvent(m_linuxImplementationDetails.m_XDisplay, &event);
@@ -170,12 +170,6 @@ namespace Core{
       return events;
    }
 
-   void LinuxWindow::newImGuiFrame(){
-      ImGui_ImplOpenGL3_NewFrame(); // TODO: Coupled here to openGL for ImGui, but this should be easy enough to change when we add other support?
-      ImGui_ImplX11_NewFrame();
-      ImGui::NewFrame();
-   }
-
    void (*LinuxWindow::getProcAddress(char* procName)) () {
       /*
       // TODO: Is this fine here in the LinuxWIndow? What if we don't use openGL?
@@ -240,17 +234,6 @@ namespace Core{
    }
 
    // TODO: If more complicated and need multiple different contexts, may need to move imgui from being a window controlled thing
-   void LinuxWindow::initImGui(){
-      IMGUI_CHECKVERSION();
-      ImGui::CreateContext();
-      ImGuiIO& io = ImGui::GetIO();
-      io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // ImGuiConfigFlags_NavEnableGamepad
-      ImGui::StyleColorsDark();
-
-      ImGui_ImplX11_InitForOpenGL(m_linuxImplementationDetails.m_XDisplay, 
-            &m_linuxImplementationDetails.m_XWindow);
-      ImGui_ImplOpenGL3_Init();
-   }
 
    void LinuxWindow::internalSetPointerPosition(Window::PointerPosition newPos){
       XWarpPointer(m_linuxImplementationDetails.m_XDisplay, None, 

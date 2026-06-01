@@ -11,7 +11,7 @@ int main(){
    Core::Application app { appSpec };
    app.pushLayer<OverlayLayer>();
    app.pushLayer<GuiTestLayer>();
-   app.pushLayer<CameraRotateLayer>();
-   app.pushLayer<UncaughtEventsOutputLayer>(); 
+   // app.pushLayer<CameraRotateLayer>();
+   // app.pushLayer<UncaughtEventsOutputLayer>(); 
    app.run();
 }
