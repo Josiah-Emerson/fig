@@ -7,13 +7,6 @@ namespace Core{
       public: 
          // TODO: How to do resizable ? 
          // TODO: How to do other flags and such
-         struct Settings{
-            int height        = 700;
-            int width         = 400;
-            bool leftJustify  = true;
-            int x             = 0;
-            int y             = 0;
-         };
 
          // value of *p_open should be checked by caller. If false, do not call draw()
          ImGuiContainer(bool* const p_open)
