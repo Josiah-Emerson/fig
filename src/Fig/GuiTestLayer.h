@@ -14,6 +14,9 @@ class GuiTestLayer : public Core::Layer {
       void onRender() override;
 
    private: 
+      void renderUI();
+
+   private: 
       Core::Gui m_gui;
       Core::Camera m_camera;
       Core::GraphicsRegistry m_graphicsRegistry;

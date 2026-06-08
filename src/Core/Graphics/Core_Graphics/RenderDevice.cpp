@@ -1,7 +1,9 @@
 #include "RenderDevice.h"
+#include <cstring>
 // TODO: Includes and extra supported graphics
 
-#if defined(OPENGL)
+// #if defined(OPENGL)
+#ifdef OPENGL
 #include "gl/GLRenderDevice.h"
 #endif
 
@@ -32,10 +34,35 @@ namespace Core{
       std::unique_ptr<RenderDevice> ret = nullptr;
 
       // TODO: Other graphics when ready
-#if defined(OPENGL)
+// #if defined(OPENGL)
+#ifdef OPENGL
       ret = std::make_unique<GLRenderDevice>(registry);
 #endif
 
       return std::move(ret);
+   }
+
+   std::size_t RenderDevice::color3ToGraphicsColorType(const Color3& color, COLOR_PTR* ptr){
+      assert(ptr && "Do not pass nullptr as ptr");
+      std::size_t size { 0 };
+#ifdef OPENGL
+      float* tmp = new float[3];
+      tmp[0] = color.R / 255.f;
+      tmp[1] = color.G / 255.f;
+      tmp[2] = color.B / 255.f;
+      *ptr = tmp;
+      size = sizeof(float) * 3;
+#endif
+
+      assert(ptr && "Color type for graphics not yet implemented in RenderDevice::color3ToGraphicsColorType");
+      return size;
+   }
+
+   void RenderDevice::freeColorPtr(COLOR_PTR ptr){
+#ifdef OPENGL
+      delete[] (float*) ptr;
+#endif
+      
+      ptr = nullptr;
    }
 } // namespace Core

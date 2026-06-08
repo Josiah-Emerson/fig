@@ -44,6 +44,11 @@ namespace Core{
          virtual void drawRegisteredEntities() = 0; // TBD: Args
                               
          static std::unique_ptr<RenderDevice> createRenderDevice(const GraphicsRegistry& registry);
+
+         // TODO: Is this best place for it?
+         typedef void* COLOR_PTR;
+         static std::size_t color3ToGraphicsColorType(const Color3& color, COLOR_PTR* ptr);
+         static void freeColorPtr(COLOR_PTR ptr);
          // static std::shared_ptr<RenderDevice> createRenderDevice(const GraphicsRegistry& registry); // TBD: Any args
 
       protected: 

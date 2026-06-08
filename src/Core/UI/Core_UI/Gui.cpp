@@ -1,4 +1,5 @@
 #include "Gui.h"
+#include "Core_Utils/Linear/Vector.h"
 #include "imgui.h"
 #include "../Application.h"
 
@@ -31,12 +32,15 @@ namespace Core{
          void endWindow();
 
          bool addButton(const char* label, bool sameLine);
-         bool addRGBSelector(const char* label, Linear::fvec3 color, bool sameLine);
+         bool addRGBSelector(const char* label, Linear::fvec3& color, bool sameLine);
 
          bool addSliderHelper(const char* label, void* data, ImGuiDataType imguiType, void* min, void* max, bool sameLine);
 
          template<typename T>
          bool addSlider(const char* label, T& var, T min, T max, bool sameLine);
+
+         bool beginGroup(const char* label, bool beginExpanded);
+         void endGroup();
 
          void beginFrame();
          void renderDrawData();
@@ -48,6 +52,7 @@ namespace Core{
          void (*m_renderDrawDataFunc)(ImDrawData*) { nullptr };
          void (*m_graphicImplNewFrame)() { nullptr };
          void (*m_windowImplNewFrame)() { nullptr };
+         int m_groupStackSize { 0 };
    };
 
    GuiImpl::GuiImpl(){
@@ -117,7 +122,7 @@ namespace Core{
       return ImGui::Button(label);
    }
 
-   bool GuiImpl::addRGBSelector(const char* label, Linear::fvec3 color, bool sameLine){
+   bool GuiImpl::addRGBSelector(const char* label, Linear::fvec3& color, bool sameLine){
       if(sameLine)
          ImGui::SameLine();
 
@@ -143,6 +148,22 @@ namespace Core{
       }
    }
 
+   bool GuiImpl::beginGroup(const char* label, bool beginExpanded){
+      bool visible = ImGui::TreeNodeEx(label, beginExpanded ? 
+            ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None);
+
+      if(visible)
+         ++m_groupStackSize;
+
+      return visible; 
+   }
+
+   void GuiImpl::endGroup(){
+      assert(m_groupStackSize > 0);
+      ImGui::TreePop();
+      --m_groupStackSize;
+   }
+
    void GuiImpl::beginFrame(){
       // TODO: Do we need to set the current context ?
       ImGui::SetCurrentContext(m_imGuiContext);
@@ -159,8 +180,8 @@ namespace Core{
       m_renderDrawDataFunc(drawData);
    }
 
-   Gui::Group Gui::Widgets::group(std::string_view label, bool beginExpanded){
-      assert(false && "Not implemented yet");
+   Gui::Group Gui::Widgets::group(const char* label, bool beginExpanded){
+      return {m_gui, label, beginExpanded};
    }
 
    void Gui::Widgets::separator(std::size_t count){
@@ -181,8 +202,21 @@ namespace Core{
       return m_gui && m_gui->m_impl->addButton(label, sameLine);
    }
 
-   bool Gui::Widgets::rgbSelector(const char* label, Linear::fvec3 color, bool sameLine){
+   bool Gui::Widgets::rgbSelector(const char* label, Linear::fvec3& color, bool sameLine){
       return m_gui && m_gui->m_impl->addRGBSelector(label, color, sameLine);
+   }
+
+   bool Gui::Widgets::rgbSelector(const char* label, Color3& color, bool sameLine){
+      Linear::fvec3 floatVec { color.R / 255.f, color.G / 255.f, color.B / 255.f };
+      if(!rgbSelector(label, floatVec, sameLine))
+         return false;
+      floatVec = floatVec * 255;
+      // TODO: Assert if > 255 ?
+      // NOTE: If we remove these casts, update comment for Color3 Types.h about updating here 
+      color.R = static_cast<std::uint8_t>(floatVec[0]);
+      color.G = static_cast<std::uint8_t>(floatVec[1]);
+      color.B = static_cast<std::uint8_t>(floatVec[2]);
+      return true;
    }
 
    template<typename T>
@@ -197,21 +231,24 @@ namespace Core{
    ADD_SLIDER_TYPE(float);
 #undef ADD_SLIDER_TYPE
 
-   Gui::Group::Group(Gui* gui, std::string_view label, bool beginExpanded){
-      assert(false && "Not implemented yet");
+   Gui::Group::Group(Gui* gui, const char* label, bool beginExpanded){
+      if(gui && gui->m_impl->beginGroup(label, beginExpanded))
+         m_gui = gui;
    }
 
    bool Gui::Group::open() const{
-      assert(false && "Not implemented yet");
-      return false;
+      return m_gui != nullptr;
    }
 
    Gui::Group::~Group(){
-      assert(false && "Not implemented yet");
+      release();
    }
 
    void Gui::Group::release(){
-      assert(false && "Not implemented yet");
+      if(m_gui)
+         m_gui->m_impl->endGroup();
+
+      m_gui = nullptr;
    }
 
    Gui::Window::Window(Gui* gui, const char* name, bool& open, Linear::ivec2 size, Linear::ivec2 pos, WindowFlags flags){

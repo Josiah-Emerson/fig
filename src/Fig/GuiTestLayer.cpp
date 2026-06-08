@@ -23,6 +23,9 @@ GuiTestLayer::GuiTestLayer()
    std::shared_ptr<Core::Shader> vertexShader = createShader("Resources/Shaders/Vertex.vs", Core::ShaderType::VERTEX_SHADER);
    std::shared_ptr<Core::ShaderProgram> program = createShaderProgram(vertexShader, fragmentShader);
 
+   std::shared_ptr<Core::Shader> unicolorVertexShader = createShader("Resources/Shaders/UnicolorVertex.vs", Core::ShaderType::VERTEX_SHADER);
+   std::shared_ptr<Core::ShaderProgram> unicolorProgram = createShaderProgram(unicolorVertexShader, fragmentShader);
+
    using Arg = typename Core::CreateComponentFunction<Core::GraphicsComponentList>::ArgType;
    auto mvp = [&cam = this->m_camera](void** data, Arg arg, std::size_t offset){
       using namespace Core;
@@ -43,22 +46,19 @@ GuiTestLayer::GuiTestLayer()
       const ColorComponent* color = std::get<const ColorComponent*>(arg);
       assert(color);
 
-      // TODO: This works if we assume that every graphics device is RGB on a scale of 0 - 1.f
-      // Need to figure out a way to make it so that it literally just points to our agnostic Color 
-      // type and then the implementation figures out how to manipulate that value
-      float tmp[3] = 
-      {
-         static_cast<float>(color->val.R) / 255.f,
-         static_cast<float>(color->val.G) / 255.f,
-         static_cast<float>(color->val.B) / 255.f,
-      };
-      memcpy(*data, tmp, sizeof(tmp));
+      RenderDevice::COLOR_PTR colPtr;
+      std::size_t size = RenderDevice::color3ToGraphicsColorType(color->val, &colPtr);
+      memcpy(*data, colPtr, size);
+      RenderDevice::freeColorPtr(colPtr);
    };
+
    program->setUniformCallback("MVP", mvp);
-   program->setUniformCallback("color", color);
+
+   unicolorProgram->setUniformCallback("MVP", mvp);
+   unicolorProgram->setUniformCallback("color", color);
 
    m_selectedID = m_graphicsRegistry.registerNewEntity(
-         Core::GraphicsComperand{program, rainbowCube},
+         Core::GraphicsComperand{unicolorProgram, rainbowCube},
          Core::PositionComponent{{0,0,0}},
          Core::ScaleComponent{{1,1,1}},
          Core::DirectionComponent{{0, 0, 0}},
@@ -71,19 +71,36 @@ void GuiTestLayer::onUpdate(float dt){
 }
 
 void GuiTestLayer::onRender(){
+   renderUI();
+   m_renderDevice->drawRegisteredEntities();
+}
+
+void GuiTestLayer::renderUI(){
    static bool open = true;
    m_gui.beginFrame();
    if(open){
-      Core::Gui::Window window {&m_gui, "Hello, World!", open, {200, 400}, {0,0}};
-      auto& positionPool = m_graphicsRegistry.getPool<Core::PositionComponent>();
+      const int WIDTH { 200 };
+      const int HEIGHT { 400 };
+      const int WINDOW_WIDTH { m_window->getWidth() };
+      Core::Gui::Window window { &m_gui, "Cube Settings", open, {200, 400}, 
+                                 {WINDOW_WIDTH - WIDTH, 0}};
 
-      window.slider("X Position", 
-            positionPool.id(m_selectedID).val[0]);
+      if(auto colorGroup = window.group("Color")){
+         Core::ColorComponent& color = 
+            m_graphicsRegistry.getPool<Core::ColorComponent>().id(m_selectedID);
+         colorGroup.rgbSelector("Cube Color", color);
+      }
 
+      if(auto positionGroup = window.group("Position")){
+         Core::PositionComponent& position = 
+            m_graphicsRegistry.getPool<Core::PositionComponent>().id(m_selectedID);
+         Core::Linear::fvec3 posVec = position.val;
+         if(positionGroup.slider({"X: ", "Y: ", "Z: "}, posVec)){
+            position.val = posVec;
+         }
+      }
    }
    m_gui.render();
-
-   m_renderDevice->drawRegisteredEntities();
 }
 
 std::shared_ptr<Core::Shader> GuiTestLayer::createShader(const char* path, Core::ShaderType type){
