@@ -9,7 +9,6 @@ target_sources(${target} PRIVATE
 
 add_subdirectory(ECS)
 add_subdirectory(Graphics)
-add_subdirectory(ImGui)
 add_subdirectory(UI)
 add_subdirectory(Utils)
 add_subdirectory(Window)
@@ -17,7 +16,6 @@ add_subdirectory(Window)
 target_link_libraries(${target} PUBLIC 
    Core::ECS
    Core::Graphics
-   Core::ImGui
    Core::Utils
    Core::Window
 )

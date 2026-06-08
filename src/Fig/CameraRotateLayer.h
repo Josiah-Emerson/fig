@@ -1,7 +1,6 @@
 #pragma once
 #include "Core_Graphics/Camera.h"
 #include "Core_Graphics/RenderDevice.h"
-#include "Core_ImGui/ImGuiPropertyEditor.h"
 #include "Layer.h"
 #include <array>
 
@@ -35,9 +34,6 @@ class CameraRotateLayer : public Core::Layer{
       std::shared_ptr<Core::RenderDevice> m_renderDevice;
       std::array<Core::GraphicsComperand, 3> m_graphicsComperands;
       Core::GraphicsRegistry m_graphicsRegistry;
-      std::unique_ptr<Core::ImGuiPropertyEditor> m_imGuiPropertyEditor; // TODO: Make ImGuiPropertyEditor
-                                                                       // to take a nullptr as a valid init 
-                                                                       // and do nothing
 
       std::vector<float> g_posData{
           -1.0f,-1.0f,-1.0f, // triangle 1 : begin

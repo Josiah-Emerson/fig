@@ -11,9 +11,7 @@ namespace Core{
             : m_openGL(*Application::get().getWindow())
             , m_modelVAOList {}
             , RenderDevice(registry)
-         { 
-            std::cout << "New GL Render Device created\n";
-         }
+         { }
 
          bool registerModel(Model& model) override;
          bool registerEntity(EntityID id, Model& model, std::shared_ptr<ShaderProgram> shaderProgram) override;
