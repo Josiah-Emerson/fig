@@ -115,6 +115,11 @@ namespace Core{
                                      // know what the old ptr was to not leak memory
                                      // if callback copies into this location, then we are fine 
                                      // to delete it anyways as setUniform will send the data where we need
+                                     // NOTE: if the pointer gets re-pointed, it should be to 
+                                     // data which is managed on a larger scope than the callback, 
+                                     // and will thus persist long enough to call setUniform 
+                                     // basically uVar.callback() should not point it towards some memory which 
+                                     // the callback itself then deletes
                uVar.callback(&data, components, i);
                currBoundProgram->setUniform(uVar.name, data);
                deleteDataPtr(oldData, uVar.type); // delete the allocated bit from getDataPtr

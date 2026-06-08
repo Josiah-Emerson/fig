@@ -34,7 +34,7 @@ namespace Core{
    using PositionComponent = Component<Linear::fvec3, PositionTag>;
    using DirectionComponent = Component<Linear::fvec3, DirectionTag>;
    using ScaleComponent = Component<Linear::fvec3, ScaleTag>;
-   using ColorComponent = Component<Color, ColorTag>;
+   using ColorComponent = Component<Color3, ColorTag>;
 
    template<typename... Components>
    struct ComponentPack {};

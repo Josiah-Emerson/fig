@@ -26,8 +26,8 @@ namespace Core{
       auto lastTime = std::chrono::system_clock::now();
       auto currentTime = lastTime;
       while(m_running){
-         m_window->newImGuiFrame();
          m_window->pollEvents();
+         m_window->prepareNewFrame();
 
          // TODO: if we should have a reason to close from the window 
          // if(m_window->shouldClose()){

@@ -8,7 +8,8 @@ add_executable(${project})
 
 # TARGET SOURCES
 target_sources(${project} PRIVATE
-   CameraRotateLayer.cpp
+   # CameraRotateLayer.cpp
+   GuiTestLayer.cpp
    OverlayLayer.cpp
    UncaughtEventsOutputLayer.cpp
    main.cpp
@@ -16,11 +17,11 @@ target_sources(${project} PRIVATE
 
 # LINK MODULES FROM CORE
 target_link_libraries(${project} PRIVATE 
-   Core
    Core::ECS
    Core::Graphics
    Core::ImGui
    Core::Utils
+   Core::UI
 )
 
 # TODO: When include dirs

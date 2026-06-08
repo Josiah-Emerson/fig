@@ -11,7 +11,7 @@ namespace Core{
       const int HEIGHT = WINDOW_HEIGHT / 2;
 
       ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT));
-      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH - WIDTH, HEIGHT));
+      ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH - WIDTH, 0));
       if(ImGui::Begin("ImGui Container", m_open))
          internalDraw();
 

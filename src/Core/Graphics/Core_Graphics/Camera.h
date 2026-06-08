@@ -29,8 +29,8 @@ namespace Core{
          // TODO: Logic for if LookMode is DIRECTIONAL
          Camera(const Linear::fvec3& pos, 
                float FOV, 
-               float height, 
                float width, 
+               float height, 
                const Linear::fvec3& look, 
                LookMode mode = LOCKED);
 
