@@ -2,11 +2,9 @@
 #include "Application.h"
 #include "Core_Graphics/GraphicsComponents.h"
 #include "Core_Graphics/RenderDevice.h"
-#include "Core_ImGui/ImGuiPropertyEditor.h"
 #include "Core_Utils/Linear/MatrixTransform.h"
 #include "Core_Utils/Linear/Vector.h"
 #include "Events.h"
-#include "imgui.h"
 #include <cstring>
 
 CameraRotateLayer::CameraRotateLayer()
@@ -17,7 +15,6 @@ CameraRotateLayer::CameraRotateLayer()
    , m_graphicsRegistry { }
    , m_renderDevice { Core::RenderDevice::createRenderDevice(m_graphicsRegistry) }
    , m_graphicsComperands { }
-   , m_imGuiPropertyEditor { nullptr }
 {
    m_graphicsRegistry.setComperandValidatorFunction(
          [&rd = this->m_renderDevice](const Core::GraphicsComperand& cmp){
@@ -87,73 +84,6 @@ CameraRotateLayer::CameraRotateLayer()
                                         Core::DirectionComponent{{0, 0, 0}},
                                         Core::ColorComponent{{128, 128, 255}});
 
-   // set up ImGui
-   Core::ImGuiPropertyEditor::DataNode rootNode;
-   rootNode.name = "CameraRotateLayer Settings";
-
-   Core::ImGuiPropertyEditor::DataNode comperandNode, movementNode, cameraNode;
-   rootNode.firstChild = &comperandNode;
-   comperandNode.nextSibling = &movementNode;
-   movementNode.nextSibling = &cameraNode;
-
-   // Comperand Settings: 
-   comperandNode.name = "Comperand Settings";
-   Core::ImGuiPropertyEditor::DataInfo comperand {
-      "Unfinished", ImGuiDataType_S32, &tmp };
-   comperandNode.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(comperand));
-
-   // Movement Settings: 
-   movementNode.name = "Cube Spatial Settings";
-   Core::ImGuiPropertyEditor::DataNode pos, scale, rot;
-   movementNode.firstChild = &pos;
-   pos.nextSibling = &scale;
-   scale.nextSibling = &rot;
-
-   pos.name = "Position";
-   auto& positionPool = m_graphicsRegistry.getPool<Core::PositionComponent>();
-
-   pos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "X", ImGuiDataType_Float, &positionPool.id(id).val[0]));
-   pos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Y", ImGuiDataType_Float, &positionPool.id(id).val[1]));
-   pos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Z", ImGuiDataType_Float, &positionPool.id(id).val[2]));
-
-   scale.name = "Scale";
-   auto& scalePool = m_graphicsRegistry.getPool<Core::ScaleComponent>();
-   scale.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "X", ImGuiDataType_Float, &scalePool.id(id).val[0]));
-   scale.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Y", ImGuiDataType_Float, &scalePool.id(id).val[1]));
-   scale.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Z", ImGuiDataType_Float, &scalePool.id(id).val[2]));
-
-   // TODO: Rotation
-   rot.name = "Rotation";
-   auto& rotPool = m_graphicsRegistry.getPool<Core::DirectionComponent>();
-   rot.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "X Axis", ImGuiDataType_Float, &rotPool.id(id).val[0]));
-   rot.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Y Axis", ImGuiDataType_Float, &rotPool.id(id).val[1]));
-   rot.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Z Axis", ImGuiDataType_Float, &rotPool.id(id).val[2]));
-
-   // Camera Settings: 
-   cameraNode.name = "Camera Settings";
-   cameraNode.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "FOV", ImGuiDataType_Float, &m_camera.fov()));
-
-   Core::ImGuiPropertyEditor::DataNode directionPos;
-   directionPos.name = "Look At";
-   cameraNode.firstChild = &directionPos;
-   directionPos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "X", ImGuiDataType_Float, &m_camera.look()[0]));
-   directionPos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Y", ImGuiDataType_Float, &m_camera.look()[1]));
-   directionPos.dataInfoArr.push_back(std::make_shared<Core::ImGuiPropertyEditor::DataInfo>(
-            "Z", ImGuiDataType_Float, &m_camera.look()[2]));
-
-   m_imGuiPropertyEditor = std::make_unique<Core::ImGuiPropertyEditor>(&rootNode);
 }
 
 bool CameraRotateLayer::onEvent(Core::Events::Event& event) {
@@ -168,7 +98,6 @@ bool CameraRotateLayer::onEvent(Core::Events::Event& event) {
 
 void CameraRotateLayer::onUpdate(float dt){
    moveCamera(dt);
-   m_imGuiPropertyEditor->draw();
 }
 
 void CameraRotateLayer::onRender(){
