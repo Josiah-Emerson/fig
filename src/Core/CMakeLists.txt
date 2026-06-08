@@ -9,6 +9,7 @@ target_sources(${target} PRIVATE
 
 add_subdirectory(ECS)
 add_subdirectory(Graphics)
+add_subdirectory(Physics)
 add_subdirectory(UI)
 add_subdirectory(Utils)
 add_subdirectory(Window)

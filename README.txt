@@ -3,16 +3,27 @@ Things to think about:
    2) Will probably need to think about refactoring so that all the components go in their own place, 
    and then the Graphics specific ComponentPack is defined somewhere else? Just doesn't seem the best rn
 
+NEXT STEP: Implement Solvers
+   - Decide how to partition solvers. Questions to ask:
+      - Should we have on single base Solver class which Solvers (and sub-classes of solvers) inherit? 
+      OR should we have a class for solvers which do Brownian motion vs other types of physical systems 
+      - If we keep all solvers together should we add an enum for selecting the solver type?
+      - How do we define what a user needs to provide for these? Will they need the same inputs? 
+      - Do we let the user provide a function for the 'stepper functions' or only give them control over 
+      variables within those said functions? 
+
+BIG (NOT FUN) TODO: Redo the graphics stuff so it is not so terrible
+
 TODO: There is a way to use our own math class with ImGui
 TODO: Do some stuff in Camera class with LOCKED vs DIRECTIONAL
 TODO: Add testing capabilities for different classes
 
-TODO: Implementing GLShaderProgram. Make it so that it can take a GLShader shared pointer as an argument (probalby a virtual func) to attach. 
+TODO: Implementing GLShaderProgram. Make it so that it can take a GLShader shared pointer as an argument (probably a virtual func) to attach. 
 Add to destructor of GLShader to delete it to free memory. In GLShaderProgram, detach GLShader in destructor from each shared pointers. Do linking stuff
 
 TODO: Projection matrix is ever so slightly off of what glm::perspective returns. Specifically in the first element and 6th i.e. second row second column
 TODO: Think about some cool ways to overload vector/matrix funcs to allow for some more useful and different stuff
-TODO: Look into how to handle (for just in vec/mat stuff but in the future more heavy calculations) things like loss of precision, when should a small number just become 0, etc..
+TODO: Look into how to handle (for now just in vec/mat stuff but in the future more heavy calculations) things like loss of precision, when should a small number just become 0, etc..
 TODO: Work on openGL renderer
 TODO: Implement a Fig enum for datatypes and have imgui handle translating so that layers don't need to know about ImGuiDataType
 TODO: Implement Tree and refactor stuff to use that
